@@ -1,0 +1,45 @@
+name: gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  public-gate:
+    name: public gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with full history
+        uses: actions/checkout@v4
+        with:
+          # bin/gate.sh 會掃 git log --all -p；shallow clone 會讓那一步假綠。
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run bin/gate.sh --public
+        env:
+          IDENTIFIER_BLOCKLIST_KEY: ${{ secrets.IDENTIFIER_BLOCKLIST_KEY }}
+          # gate 有一步會擋 __pycache__／.pyc（.pyc 內嵌編譯來源的絕對路徑）；
+          # 這裡先讓 CI 自己不要製造那些檔案。gate.sh 內部也會再 export 一次。
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -euo pipefail
+          if [ -n "${IDENTIFIER_BLOCKLIST_KEY:-}" ]; then
+            keyfile="$(mktemp)"
+            printf '%s' "$IDENTIFIER_BLOCKLIST_KEY" > "$keyfile"
+            chmod 600 "$keyfile"
+            export IDENTIFIER_BLOCKLIST_KEY_FILE="$keyfile"
+            trap 'rm -f "$keyfile"' EXIT
+            bin/gate.sh --public
+          else
+            echo "::notice title=L2 skipped::沒有 IDENTIFIER_BLOCKLIST_KEY（fork 的 PR 拿不到 secret）；本次以 --no-blocklist 跑，L1／L3 與測試照跑。維護者合併前要在 same-repo 分支或本機補跑一次完整 gate。"
+            bin/gate.sh --public --no-blocklist
+          fi

@@ -1,0 +1,4 @@
+interface:
+  display_name: "試算表檢查"
+  short_description: "唯讀檢查辦公試算表的缺值、重複、格式、公式與異常數值"
+  default_prompt: "使用 $review-office-spreadsheet，先唯讀檢查這份表格並列出可驗證的問題。"

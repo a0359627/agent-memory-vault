@@ -1,0 +1,4 @@
+interface:
+  display_name: "辦公交接打包"
+  short_description: "建立去機敏、可驗證、附操作地圖與未完成事項的工作交接 ZIP"
+  default_prompt: "使用 $package-office-handoff，把這個工作資料夾整理成安全的交接 ZIP。"

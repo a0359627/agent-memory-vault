@@ -1,0 +1,4 @@
+interface:
+  display_name: "辦公研究查證"
+  short_description: "用可點來源、日期與信心標記建立可追溯的辦公研究摘要"
+  default_prompt: "使用 $verify-office-research，整理一份每條主張都有來源與日期的研究摘要。"

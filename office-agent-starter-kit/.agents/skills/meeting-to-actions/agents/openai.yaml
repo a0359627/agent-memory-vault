@@ -1,0 +1,4 @@
+interface:
+  display_name: "會議轉行動"
+  short_description: "將會議紀錄轉成可追溯的決策、待辦、負責人與期限清單"
+  default_prompt: "使用 $meeting-to-actions，把這份會議紀錄整理成決策、待辦與待確認事項。"

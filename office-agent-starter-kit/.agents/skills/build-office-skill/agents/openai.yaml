@@ -1,0 +1,4 @@
+interface:
+  display_name: "建立辦公室 Skill"
+  short_description: "把重複辦公流程做成可測試的 Codex skill"
+  default_prompt: "使用 $build-office-skill，帶我把一項重複辦公流程做成可測試的 skill。"

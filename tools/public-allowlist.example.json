@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "repo": "example-public-vault",
+  "_readme": "這是 tools/export_public.py 的 manifest 範例。裡面的人名、公司名、路徑全是虛構的，**每一條 pattern 也都是編的，不對應任何真實來源的原文**——連句型都刻意不像真的，因為 pattern 的句型本身就會洩漏你的來源長什麼樣。照抄不會洩漏任何人的東西，但照抄也不會有用——請換成你自己的。⚠️ 最重要的一句：manifest 的 pattern 欄位裝的就是你來源檔的原文，expect 裝的是它出現幾次——所以**你自己的 manifest 永遠放在私有側，公開的只能是像這樣全虛構的範例**。用法：tools/export_public.py --manifest <這個檔> --source ~/my-vault --out ~/my-public-vault（預設唯讀檢查，加 --apply 才寫）。",
+  "_fields": {
+    "assert_absent": "對每個目的檔的最終內容跑的 regex；命中即 ERROR。錯誤訊息只印檔名、行號與 pattern，永不印命中值。這是 allowlist 之外的兜底，不是主防線。",
+    "mode": "copy=內容照搬；rewrite=對來源套 rules 後輸出；pinned=公開 repo 內手寫的檔，只驗 sha256；generate=由別的工具產生（例如 docs/REFERENCES.md），只驗 sha256。",
+    "sha256": "刪改後輸出的 sha256（64 位小寫 hex）。第一次填值：先跑 --print-hashes。expect 抓『規則沒改到』，sha256 抓『規則之外的手改』。",
+    "placeholders": "佔位符（雙大括號那種）在這個範例裡寫成 JSON 的 \\u007b 跳脫，解析出來仍然是真正的佔位符字串。這樣做是因為 publish_check 的 L3 規定「雙大括號只准出現在 template/」，而這個檔在 tools/。你自己的 manifest 放在私有 vault，直接寫字面值即可。",
+    "rules": "只有 rewrite 用。依序套用；每條 pattern 必須恰好命中 expect 次，0 次或多於 expect 都 fail。replace 走 re.sub 語義（\\1 可回填 group）。flags 選填，預設 [\"MULTILINE\"]。"
+  },
+  "assert_absent": [
+    "李小明|王大寶",
+    "(?i)example-corp|starlight-studio",
+    "(?i)example-corp\\.test|starlight\\.test",
+    "/[Uu]sers/[a-z][a-z0-9_.-]*/",
+    "/h[o]me/[a-z][a-z0-9_.-]*/",
+    "(?i)\\bnarwhal-prod-[0-9]{4}\\b",
+    "(?i)\\bclient-atlas\\b"
+  ],
+  "files": [
+    {
+      "dest": "template/AGENTS.md",
+      "mode": "copy",
+      "src": "AGENTS.md",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "note": "來源已經沒有任何個人化內容，照搬即可；sha256 仍然 pin 住，來源被改動時這裡會紅。"
+    },
+    {
+      "dest": "template/AGENT-RULES.md",
+      "mode": "rewrite",
+      "src": "AGENT-RULES.md",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "rules": [
+        {
+          "pattern": "^# .+ — 共用 Agent 協作與知識庫規範$",
+          "replace": "# \u007b\u007bVAULT_NAME\u007d\u007d — 共用 Agent 協作與知識庫規範",
+          "expect": 1,
+          "note": "標題含私有 repo 名 → 換成佔位符（佔位符只准出現在 template/）。"
+        },
+        {
+          "pattern": "^- <某類頁面> 的位置在 .+$\\n",
+          "replace": "",
+          "expect": 1,
+          "note": "整行刪除。expect 是斷言不是統計：它表示『我知道來源長這樣的行有幾條』，來源多長一條時這裡會 fail，不會靜默漏掉。這個 1 是編的，換成你自己數出來的數字——也請注意這個數字本身會洩漏你的來源長什麼樣，所以 manifest 要放私有側。"
+        },
+        {
+          "pattern": "^<某個會洩漏的行首>：.+$",
+          "replace": "祕密清冊位置只記在版本庫之外",
+          "expect": 1,
+          "note": "憑證的**位置**本身就是機敏資訊，不只路徑，連它的層級與檔案型態都算指路——所以這個 note 自己也不示範任何真實形狀，連行首那幾個字都用角括號佔位。pattern 這一側同理：不要照抄來源的句型，用 `.+` 吃掉整段。"
+        },
+        {
+          "pattern": "回覆一律使用<某語言>",
+          "replace": "語言使用 \u007b\u007bLANG\u007d\u007d",
+          "expect": 1,
+          "note": "工作語言這種欄位換成佔位符，範本才對別人成立。這裡的 pattern 一樣是編的——真的那條長什麼樣，只有你的私有 manifest 知道。"
+        }
+      ]
+    },
+    {
+      "dest": "skills/grill-me/SKILL.md",
+      "mode": "rewrite",
+      "src": "08-skill-base/claude-skills/grill-me/SKILL.md",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "rules": [
+        {
+          "pattern": "<某個領域>工作的常見對齊點",
+          "replace": "新東西的常見對齊點",
+          "expect": 1,
+          "note": "去掉領域脈絡，讓 skill 對別人也成立。（這裡的 pattern 是虛構的示意；你自己的規則會照抄活檔原文，那就是 manifest 必須放私有側的原因。）"
+        },
+        {
+          "pattern": "（<寫給自己看的一句評語>）",
+          "replace": "（多數人不喜歡那樣）",
+          "expect": 1,
+          "note": "第二人稱的個人判斷 → 通用語。"
+        }
+      ]
+    },
+    {
+      "dest": "README.md",
+      "mode": "pinned",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "note": "公開 repo 內手寫、私有 vault 沒有對應來源的檔。改了就要更新 sha256，這一步是刻意的摩擦。"
+    },
+    {
+      "dest": "docs/REFERENCES.md",
+      "mode": "generate",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "note": "由 tools/build_references.py 從私有母本生成，不手改；這裡只 pin 結果。"
+    }
+  ]
+}

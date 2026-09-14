@@ -1,0 +1,8 @@
+invoice_no,date,department,item,amount,currency,approved
+INV-1001,2026-07-01,Sales,Taxi,680,TWD,yes
+INV-1002,2026/07/02,Marketing,Printing,4200,TWD,yes
+INV-1003,2026-07-03,Sales,Client lunch,,TWD,no
+INV-1002,2026-07-02,Marketing,Printing,4200,TWD,yes
+INV-1005,July 4 2026,IT,Cloud service,98000,TWD,no
+INV-1006,2026-07-05,,Office supplies,1350,TWD,yes
+INV-1007,2026-07-06,HR,Training,22000,USD,yes

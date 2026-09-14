@@ -1,0 +1,73 @@
+# === Secrets — 永不進 git ===
+# 本地 secrets 文件區（給 vault 擁有者自己查的 .md，整個資料夾絕不上 GitHub）
+99-secrets-local/
+.env
+.env.*
+*.env
+env/
+secrets/
+*.key
+*.pem
+*.p12
+*token*
+*credentials*
+*client_secret*
+client_secret*.json
+*.oauth.json
+service-account*.json
+
+# 禁用識別字的明文清單與 HMAC key 只存在本機；
+# 只有 bin/identifier-blocklist.hmac（不可逆）能進 git。
+identifier-blocklist.txt
+hmac.key
+
+# === 大型二進位／媒體輸出（不進 git；走外部儲存）===
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.wav
+*.mp3
+*.m4a
+*.png
+*.jpg
+*.jpeg
+*.gif
+# 例外：未來如需保留示意圖
+!_examples/**
+# 例外：skill 鏡像的資產（參考圖等）必須進 git 才能遷移
+!08-skill-base/**
+# 但鏡像內若出現 env/金鑰檔仍要擋（防呆）
+08-skill-base/**/.env
+08-skill-base/**/*.key
+08-skill-base/**/*.pem
+08-skill-base/**/client_secret*.json
+08-skill-base/**/token.json
+08-skill-base/**/service-account*.json
+
+# 打包產物（office kit 的 release ZIP 由 CI 重建，不入庫）
+*.zip
+
+# === Claude / 工具 ===
+.claude/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+
+# === OS / IDE ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# === Obsidian（workspace 狀態，非筆記）===
+.obsidian/workspace*.json
+.obsidian/cache
+.trash/
+
+# age 私鑰永不進 git（解密根信任，單獨手搬）。密文包 99-secrets-encrypted/ 可進 git。
+*age-identity*
+*.agekey

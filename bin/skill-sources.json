@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "shared_source": "~/.claude/skills",
+  "shared_runtime": "~/.agents/skills",
+  "shared_skills": [],
+  "origins": [
+    {
+      "id": "claude-skills",
+      "source": "~/.claude/skills"
+    }
+  ],
+  "global_files": [],
+  "memory_source": null,
+  "primary_memory_project": null,
+  "notes": "共用 skill 的正文只在 shared_source 維護；shared_runtime 只放指向它的符號連結。shared_skills 列出你要跨平台共用的 skill 名稱，空陣列代表還沒有。memory_source 為 null 代表不快照任何平台記憶；要啟用時填入平台的專案記憶根目錄，並用可選的 memory_projects 陣列指定要收哪些專案——不指定就是整台機器的每個專案都收。平台內建 skill 與 plugin 快取不在快照範圍。"
+}

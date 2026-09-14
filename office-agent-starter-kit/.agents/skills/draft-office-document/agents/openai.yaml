@@ -1,0 +1,4 @@
+interface:
+  display_name: "辦公文件起草"
+  short_description: "依核准來源起草郵件、備忘錄、狀態報告並標出待確認內容"
+  default_prompt: "使用 $draft-office-document，依我提供的來源起草一份辦公文件。"

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# agent-memory-vault pre-commit hook
+#
+# 對「即將被 commit 的內容」跑 tools/publish_check.py --staged（L1＋L2＋L3）。
+# 掃的是暫存區的 blob，不是工作目錄，所以 `git add -p` 只加一半也擋得住。
+#
+# 安裝：./tools/install-hooks.sh
+# 離開碼：0 通過／2 有發現／3 設定錯誤（例如 .hmac 在但 key 拿不到）。
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+checker="$repo_root/tools/publish_check.py"
+
+if [ ! -f "$checker" ]; then
+  echo "pre-commit: 找不到 $checker，略過掃描" >&2
+  exit 0
+fi
+
+set +e
+python3 "$checker" "$repo_root" --staged
+status=$?
+set -e
+
+case "$status" in
+  0)
+    exit 0
+    ;;
+  3)
+    cat >&2 <<'MSG'
+
+pre-commit 擋下這次 commit：publish_check 設定錯誤（exit 3）。
+最常見的原因是 bin/identifier-blocklist.hmac 存在，但 IDENTIFIER_BLOCKLIST_KEY_FILE
+沒有指向可讀的 key 檔。這是 fail-closed，不是誤報——把 key 路徑設好再 commit。
+MSG
+    exit 3
+    ;;
+  *)
+    cat >&2 <<'MSG'
+
+pre-commit 擋下這次 commit：publish_check 有發現（見上方 <LEVEL> <path>:<line> <kind>）。
+L2 只印 HMAC 前 8 碼；本機持有 key 時可用
+    python3 tools/publish_check.py . --reveal
+看出到底是哪個字。修掉之後再 commit，不要用 --no-verify 繞過。
+MSG
+    exit "$status"
+    ;;
+esac
