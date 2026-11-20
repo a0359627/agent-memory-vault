@@ -3,8 +3,11 @@
 > Append-only。格式 `## [YYYY-MM-DD] <type> | <標題>`，保持可 grep。
 > 新的一則寫在檔尾；狀態後來改變時不就地改寫，另寫一則 `supersede` 並回到原則加一行指向它。
 
-這份是**範例 vault 的劇本**。八則紀錄涵蓋八種 type，而且這個 vault 裡的每一頁，
+這份是**範例 vault 的劇本**。十則紀錄涵蓋九種 type，而且這個 vault 裡的每一頁，
 都能在下面找到「它是哪一則寫出來的」。想知道一個知識庫怎麼長出來的，從這裡往下讀就好。
+
+> 碎片：本檔正被別的 session 改動、還沒提交時，那一則改寫進 `log-append-YYYY-MM-DD.md`，
+> 由 [[vault-consolidation]] 每週依日期原文併回（2026-02-18 那則就是這樣進來的）。
 
 > 型別詞彙的注意事項：`template/03-wiki/log.md` 的基本表列了七個 type
 > （`init`／`ingest`／`update`／`promote`／`review`／`supersede`／`lint`）。
@@ -34,7 +37,7 @@
 更新 [[proj-weekly-report-bot]]：原本每週手抄客戶進度，改成用腳本讀工時試算表產出草稿。
 這一週也第一次往 [[03-known-traps]] 寫東西——第 1 條（試算表空白欄不是 0，會讓工時少算）
 與第 2 條（圖片檔名的全形空白上線後 404）都是這次做出來的坑，各附症狀與驗證方法。
-狀態仍是 `pilot`：腳本跑得出草稿，但寄出這一段還是手動，也還沒有客戶對「用機器產的週報」表示過意見。
+專案狀態（`subject_status`）仍是 `pilot`：腳本跑得出草稿，但寄出這一段還是手動，也還沒有客戶對「用機器產的週報」表示過意見。
 
 ## [2026-02-03] promote | weekly-client-report 由草稿晉升為共用 skill
 
@@ -47,7 +50,7 @@
 
 客戶回饋分類的做法只在甲咖啡館一個客戶身上成立過，抽取門檻**不成立**，因此只寫成草稿
 `05-skills-drafts/client-feedback-triage/`（[[05-skills-drafts/client-feedback-triage/SKILL]] ＋ [[05-skills-drafts/client-feedback-triage/notes]] 兩次實跑觀察），
-並建 status 為 `draft` 的卡 [[skill-client-feedback-triage]] 說明它現在能用到哪。
+並建一張 `status: watchlist`、`subject_status: draft` 的卡 [[skill-client-feedback-triage]] 說明它現在能用到哪。
 同時在 [[open-questions]] 開了 `draft-promotion-threshold`：一支 skill 要幾個客戶驗證過才算通用。
 另補 [[03-known-traps]] 第 4 條（客戶寄來的「最終版」PDF 沒有版本號，2026-02-04 咬到）。
 
@@ -63,7 +66,14 @@
 [[review-2026-02-14-first-month]]：逐案列 evidence 與誠實狀態，並把平常口語的「上線了」
 拆成 committed／deployed／client accepted 三種不同證據。結論之一是
 [[proj-weekly-report-bot]] 的寄送路徑沒有人工核准點，列為風險但當週沒有動它。
-Review 頁寫完即 `frozen`，後續變化另寫新頁，不回頭改這一頁。
+Review 頁的 `status` 一開始就是 `historical`（寫完凍結），後續變化另寫新頁，不回頭改這一頁。
+
+## [2026-02-18] update | 週報產生器先停用寄送（事故當天止血）
+
+誤寄發生後先把週報產生器的寄送步驟停用，並在 [[proj-weekly-report-bot]] 頁頂暫時加一行「寄送已停用，待正式處置」。
+正式的設計變更與陷阱紀錄留給之後的 `supersede`，這一則只記止血。
+
+（原載碎片 `log-append-2026-02-18.md`，2026-02-20 原文併入。）
 
 ## [2026-02-20] supersede | 週報產生器改為「只產草稿、人核准才寄」
 
@@ -71,3 +81,9 @@ Review 頁寫完即 `frozen`，後續變化另寫新頁，不回頭改這一頁�
 [[proj-weekly-report-bot]] 頁頂換成新的「現行有效」段，舊的自動寄送設計整段標 `superseded`
 並雙向指向新段；[[03-known-traps]] 補第 3 條（附事故日期與可貼上的修法）。
 這也回頭印證 [[review-2026-02-14-first-month]] 六天前列的那條風險：列進 review 不等於已經修掉。
+
+## [2026-02-20] lint | 定期整併（第一輪）
+照今天新建的 [[vault-consolidation]] 跑第一輪，頻率定為每週五收工前手動跑一次。起因是 2026-02-18 事故當天
+有兩個 session 同時在改本檔，止血那一則只好先寫成碎片。機械整併：碎片 `log-append-2026-02-18.md` 的一則
+依日期原文併回本檔、刪掉碎片；壞連結 0、孤兒頁 0、代謝 warning 0。[[index]] 的「維護」加一行連到流程頁。
+語意檢查只提案，這一輪沒有提案。

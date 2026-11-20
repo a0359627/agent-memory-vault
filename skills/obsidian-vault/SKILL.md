@@ -21,6 +21,11 @@ description: 把已授權保存的新來源、跨案方法或決策沉澱到正�
 3. **限定主張。** 高影響內容寫明來源、觀察日期、適用範圍及 authority。舊決策被取代時標明新舊關係；歷史 review／worklog 保持原樣，在現行頁說明修正。
 4. **判斷是否值得抽 skill。** 有重用需求，而且有非顯而易見的判準、可靠腳本或領域資產時，才使用 `forge-skill`。本體位置由 ROUTING 決定，wiki 只留導航。
 5. **完成引用。** 更新受影響的索引與 log；只在新增、解答或失效時調整 open questions。檢查本次修改的連結及相互矛盾的入口。
+   來源資料夾要被消化它的那一頁用真連結指到（反引號裡的路徑不是連結）；`log.md` 已有別的 session 尚未提交的修改時，
+   改寫 log 碎片 `03-wiki/log-append-YYYY-MM-DD.md`。交付前跑 `./bin/check-routing.sh`，warning 要看過。
+
+要盤點全部專案的狀態、更新偏好或整理 skill 時，另讀 [盤點的證據與覆蓋](references/status-review.md)，
+避免把過期的主分支、匯入的對話紀錄或安裝清單當成現況。
 
 ## 回饋與記憶
 

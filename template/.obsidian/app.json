@@ -1,1 +1,5 @@
-{}
+{
+  "userIgnoreFilters": [
+    "08-skill-base/"
+  ]
+}

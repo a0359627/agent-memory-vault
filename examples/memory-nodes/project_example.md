@@ -5,6 +5,8 @@ metadata:
   node_type: memory
   type: project
   modified: 2026-02-20
+  observed_at: 2026-02-20
+  revisit_when: 週報產生器的寄送流程再改，或開始服務第三個客戶
 ---
 
 週報產生器是工作室的內部小工具：讀客戶工時試算表匯出的 CSV，
@@ -13,6 +15,10 @@ metadata:
 **scope：** 只在週報產生器這個工具的語境成立。同樣的話用在其他腳本上不適用。
 
 **source：** vault 的 `03-wiki/proj-weekly-report-bot.md`「現行有效」段（2026-02-20 起）。
+
+- **authority：** `authoritative-source`（vault 的 project card）
+- **status：** `current`
+- **observed_at／revisit_when：** 寫在 frontmatter。project 型節點兩個都必填，而且要放在檢查器讀得到的地方。
 
 **Why:** 「跑一下週報」這句話有歧義——它可能是「產草稿」也可能是「寄給客戶」。
 2026-02-18 那次誤寄之後，這個歧義變成有代價的，所以把它的意思釘死在這裡。

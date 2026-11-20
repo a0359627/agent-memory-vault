@@ -5,10 +5,11 @@ type: index
 
 # Projects
 
-> 所有 project 頁分叢集列出，格式為「wikilink — 一句話 — status」。
+> 所有 project 頁分叢集列出，格式為「wikilink — 一句話 — 專案狀態」。
 > 同一專案可能跨多叢集；這裡按主歸屬列一次。叢集星狀中心見各 cluster 頁。
-> `status` 用固定詞彙：`discovery`／`planning`／`pilot`／`production`／`observe-only`／`archive`。
-> 狀態寫的是**證據層級**，不是心情：沒有人類驗收就不能寫 `production`。
+> 行尾的專案狀態用固定詞彙：`discovery`／`planning`／`pilot`／`production`／`observe-only`／`archive`，
+> 對應卡片的 `subject_status`（卡片的 `status` 是另一件事：那一頁的理解還算不算數）。
+> 專案狀態寫的是**證據層級**，不是心情：沒有人類驗收就不能寫 `production`。
 >
 > 下面兩列是格式範例，建了真的 project card 之後把它們換掉。
 

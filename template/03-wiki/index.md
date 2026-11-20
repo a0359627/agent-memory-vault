@@ -16,7 +16,7 @@ type: hub
 - 開始一件新工作：先看 [[projects]] 找到對應的 project card，再核對 active repo。
 - 找能力／工具：[[skills]]；skill 卡只導航，本體位置見 ROUTING。
 - 沉澱新來源或新經驗：先讀 [[memory-metabolism]]，再決定進 `02-raw/` 還是 `03-wiki/`。
-- 不確定某件事現在是否還成立：查 [[open-questions]] 與該頁的 `status`。
+- 不確定某件事現在是否還成立：查 [[open-questions]] 與該頁的 `status`（`current` 以外都先重驗）。
 - 想知道這個庫最近改了什麼：[[log]]。
 
 ## 主題叢集（star hubs）
@@ -28,13 +28,14 @@ type: hub
 
 ## 索引頁（分類清單）
 
-- [[projects]] — 所有 project 分叢集列出（含 status）。
+- [[projects]] — 所有 project 分叢集列出（含專案狀態 `subject_status`）。
 - [[skills]] — 所有 skill，分 active／draft／bundled。
 - [[open-questions]] — 會妨礙未來協助的未知／爭議；分 Active、Answered、Stale 維護。
 
 ## 方法與規範
 
 - [[memory-metabolism]] — 記憶代謝規範：來源 → 候選 → 確認／爭議／過期，以及可更正、可遺忘。
+- [[vault-consolidation]] — 定期整併：每週一次，機械整併直接做、語意判斷只提案；代謝規範的執行節奏。
 - `ROUTING.md`（vault 根目錄）— 東西該寫到哪的唯一路由。
 - `AGENT-RULES.md`（vault 根目錄）— 共用協作規範。
 

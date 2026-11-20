@@ -7,6 +7,8 @@ type: index
 
 > 本頁是**目的導覽**，不是安裝清單：告訴你「什麼情境用哪一支」。
 > skill 卡只導航，不複製整份 skill；正文在活檔位置。三個區塊的狀態不要混。
+> 行尾是 skill 自己的狀態（卡片的 `subject_status`）。卡片的 `status` 記卡片本身：
+> Active 區是 `current` 並帶 `verified_at`，Draft 區是 `watchlist`。
 
 ## Active（活檔，現在就會被觸發）
 

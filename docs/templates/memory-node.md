@@ -21,8 +21,11 @@
 - **Authority**：<user-confirmed | authoritative-source | observed-pattern | inferred>
 - **Status**：<current | candidate | superseded | contested | stale>
 - **Observed at**：<YYYY-MM-DD>
-- **Revisit when**：<什麼條件改變時要重問>（可選，但高影響的主張建議都寫）
+- **Revisit when**：<YYYY-MM-DD 或一個條件>（project 型必填；其他型可選，但高影響的主張建議都寫）
 ```
+
+`candidate` 是條目行內的階段標記，寫給人看的。整頁都還是候選時，那一頁 frontmatter 的 `status` 寫 `watchlist`：
+frontmatter 的 `status` 只有六個值，`candidate` 不在裡面。
 
 ---
 
@@ -31,7 +34,7 @@
 | 型 | 放什麼 | 最容易寫壞的地方 |
 |---|---|---|
 | **user**（人） | 工作語言、決策風格、做事順序、查證邊界 | 寫成形容詞（「喜歡簡潔」）。改寫成指令（「先給結論再給理由，選項最多三個」）。 |
-| **project**（專案） | 這個專案的既定選擇與邊界 | 忘了寫 scope，於是被套用到別的專案。 |
+| **project**（專案） | 這個專案的既定選擇與邊界 | 忘了寫 scope，於是被套用到別的專案；把專案進度抄進來，三個月後舊進度被當成現況注入。只留指標，進度寫在 project card。 |
 | **feedback**（回饋） | 對方說過的話，以及它真正的意思 | 只記結論不記原話。**原話要留**，因為結論可能是你理解錯的。 |
 | **reference**（外部事實） | 版本、配額、價格、API 行為 | 沒寫 `observed_at`。動態事實一定要標時間，並且**用前重驗**。 |
 

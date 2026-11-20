@@ -18,6 +18,11 @@ metadata:
 **source：** vault 的 `03-wiki/skill-weekly-client-report.md`「2026-02-03 晉升說明」段；
 爭議記在 `03-wiki/open-questions.md` 的 `draft-promotion-threshold`（狀態 Active）。
 
+- **authority：** `authoritative-source`（vault 的 skill 卡與 open question）
+- **status：** `current`——這條記的是「門檻從哪來、有多薄」，這件事本身是確定的；門檻還沒定案是另一回事。
+- **observed_at：** 2026-02-05
+- **revisit_when：** `draft-promotion-threshold` 移到 Answered，或第二支 skill 走完晉升時。
+
 **Why:** 這三條不是先想好再套用的，是 `weekly-client-report` 晉升**之後**回頭歸納的，
 樣本數是一。它現在的地位是「目前的做法」，不是「已驗證的規則」——
 差別在於：前者可以被下一個案例推翻，後者不行。標錯會讓人拿它去擋別人的提案。

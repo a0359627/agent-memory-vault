@@ -42,13 +42,23 @@ updated: {{TODAY}}
 | 主題星圖 | `03-wiki/cluster-*.md` | 只寫連結，不複製成員頁事實 |
 | 時間切片 | `03-wiki/review-*.md`、`worklog-*.md` | 寫完凍結；後續用新 review 取代，不回改歷史 |
 | 未知／爭議 | `03-wiki/open-questions.md` | 只收會妨礙未來協助的問題 |
-| skill 草稿 | `05-skills-drafts/<name>/SKILL.md` | 通過實戰後移至 active 位置並刪草稿，不留分歧全文 |
+| skill 草稿 | `05-skills-drafts/<name>/SKILL.md` | 卡片 `status: watchlist`。晉升門檻：至少跨 2 個 session 真用 3 次、步驟能無歧義寫出、所需工具在當前環境 `command -v` 得到；晉升後卡片記 `promoted_from` 與 `verified_at`，刪草稿不留分歧全文。單次成功留在 log，不出 skill |
+| log 碎片 | `03-wiki/log-append-YYYY-MM-DD.md` | `log.md` 已被別的 session 改動時才用；一則一個 `## [日期] type \| 標題`，由 `bin/consolidate.py --apply` 原文併回後刪除 |
 | 活檔鏡像 | `08-skill-base/` | 只由同步腳本寫，不手改 |
 | Secret 值 | `99-secrets-local/` | gitignored，永不進 Git；版本庫只記位置 |
 | 專案活動快照 | `STATUS.md` | 只由 `bin/scan-state.sh` 生成；不是 production 驗證 |
 
-更新 `03-wiki/` 後要更新 `index.md`、append `log.md`，並依 [[memory-metabolism]] 標記
-`current`／`superseded`／`contested`／`stale`。
+更新 `03-wiki/` 後要更新 `index.md`、append `log.md`，並依 [[memory-metabolism]] 標記。
+
+frontmatter 分兩軸：`status` 只記本頁的記憶生命週期（`current`／`superseded`／`contested`／
+`watchlist`／`stale`／`historical`），`subject_status` 記頁面所描述之專案或 skill 的狀態
+（`pilot`／`production`／`frozen`／`draft`…）。封閉詞彙在 `bin/status-vocab.json`，要增減就改那一份。
+`bin/check-routing.sh` 對下列情形發 warning：詞彙外的值、日期已過的 `revisit_when`、
+缺 `superseded_by` 的 superseded 頁、`current` 的 skill 卡缺 `verified_at` 或超過 180 天、
+`03-wiki/` 的 `current` 頁沒有 `updated`／`observed_at`／`verified_at` 任一日期欄位、
+`02-raw/`／`04-projects/`／`07-archive/` 的子資料夾沒有被任何頁面用真連結指到。
+被 `.gitignore` 擋掉的 wiki 頁是 error：它在磁碟上一切正常，卻永遠進不了 git。
+舊的單軸 `status` 用 `bin/migrate_status.py` 一次搬遷（預設乾跑）。每週的整理流程見 [[vault-consolidation]]。
 
 ## Skill 本體、平台入口與鏡像
 
@@ -65,6 +75,7 @@ updated: {{TODAY}}
 用 `--apply` 安裝入口，舊副本會先移到本機備份。`./08-skill-base/sync-to-vault.sh --apply`
 將活檔與列名的平台全域入口建立可還原快照。
 快照會展開外部 symlink，保存 hash；恢復時按來源還原並重建共用入口。
+來源目錄裡由別的工具管理的頂層子目錄，用該 origin 的 `exclude` 列出來，就不會被讀進鏡像。
 
 ## 相似 skill 的選用
 
@@ -81,4 +92,12 @@ updated: {{TODAY}}
 `01-profile/` 是結構化偏好的 canonical。平台自有的專案記憶（例如 `~/.claude/projects/<proj>/memory/`）
 只放短期 correction 或指標，不複製一份會分岔的永久偏好。
 
-回 [[index]] · [[memory-metabolism]]
+專案型的平台記憶（`type: project`）要帶 `observed_at` 與 `revisit_when`；啟用記憶鏡像後，
+超過 90 天又沒有 `revisit_when` 的，`check-routing` 會發 warning。專案狀態寫在 project card，
+記憶檔只留指標，否則三個月後它會把舊狀態當現況注入。
+
+要把平台記憶鏡像進 vault 時，先決定哪些專案不收：`bin/skill-sources.json` 的 `memory_exclusions`
+按專案 id 記排除原因，排除發生在讀取記憶內容之前。secret 掃描只認得金鑰的形狀，
+所以這一層不能靠掃描補。用法與限制見 starter 的 `docs/skills-and-sync.md`。
+
+回 [[index]] · [[memory-metabolism]] · [[vault-consolidation]]

@@ -13,6 +13,10 @@ description: 建立或改進你的自訂 skill，或判斷一段工作是否值�
 有重用需求，而且能提供模型原本沒有的領域判準、可靠腳本或資產，才值得獨立成 skill。
 一次性結果留在專案；只有通用提醒時，優先精簡既有規則。使用者明確指定的交付仍依其要求完成。
 
+草稿（`05-skills-drafts/`）晉升為正式 skill 的門檻，見 ROUTING「skill 草稿」列：至少跨 2 個 session 真正用過 3 次、
+步驟能無歧義寫出、所需工具在當前環境 `command -v` 得到。單次幸運成功是紀錄，不是 skill；
+晉升時 wiki 卡記 `promoted_from` 與 `verified_at`，卡片 `status` 由 `watchlist` 改 `current`。
+
 ## 寫法
 
 - 使用當前平台可用的 `skill-creator` 處理格式與驗證；同名工具有多份時依 ROUTING 選用，不串跑全部。

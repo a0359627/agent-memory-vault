@@ -10,8 +10,8 @@
 
 ## 第一半：沿著別人的 log 逛一遍
 
-打開範例 vault 的 `03-wiki/log.md`。它是一份劇本——八則紀錄，
-從 `init`（建庫）一路走到最後的 `supersede`（新結論取代舊結論），
+打開範例 vault 的 `03-wiki/log.md`。它是一份劇本——十則紀錄，
+從 `init`（建庫）一路走到 `supersede`（新結論取代舊結論），最後以一則 `lint`（第一輪定期整併）收尾，
 中間經過 ingest（新來源進來）、update（既有頁被修訂）、promote（草稿升成正式能力）與 review（時間切片盤點）。
 
 **逛法**：一則一則往下讀，每讀一則就去點它提到的那幾頁。你在找的是這五件事：
@@ -43,7 +43,7 @@
 ```text
 我要把這份來源沉澱進 vault。請先讀 AGENT-RULES.md、ROUTING.md 與
 03-wiki/memory-metabolism.md，再依 ingest 流程處理，最後告訴我你改了哪幾個檔、
-以及哪些結論你標成了 candidate 而不是 current。
+哪些頁標成 watchlist 而不是 current，以及哪些主張只是候選。
 ```
 
 （裝了 `obsidian-vault` 這支 skill 的話，說「把這份寫回我的知識庫」就會走同一條流程。）
@@ -53,14 +53,31 @@
 | # | 應該出現的變化 | 怎麼確認 |
 |---|---|---|
 | 1 | `02-raw/<主題>/` 多了原文 ＋ 一張出處卡 `SOURCE.md` | 出處卡要有來源、抓取版本、授權、抓取日、「為何留」。格式見 [template/02-raw/README.md](../template/02-raw/README.md) |
-| 2 | `03-wiki/` 多了（或更新了）一張彙編頁 | 裡面是摘要、推論與關聯，**不是原文複製**；frontmatter 有 `status`／`source`／`scope`／`authority` |
+| 2 | `03-wiki/` 多了（或更新了）一張彙編頁，並用**真連結**指到第 1 步的資料夾 | 裡面是摘要、推論與關聯，**不是原文複製**；frontmatter 照下一節填。連結要寫在正文，指向資料夾裡的某個檔（雙括號連結）或用 Markdown 連結指向資料夾；指向資料夾本身的雙括號連結不算：反引號裡的路徑與 frontmatter 的 `source:` 都不算，那個資料夾在圖譜上會是一座孤島 |
 | 3 | 受影響的既有頁被標了狀態 | 若這份來源推翻了舊結論，雙向標 `supersedes`／`superseded_by`；矛盾但都可信就標 `contested`，兩邊都留 |
 | 4 | `03-wiki/index.md` 多一列 | 新頁要能從入口點得到，否則它就是孤兒；`./bin/check-routing.sh` 會抓出來 |
-| 5 | `03-wiki/log.md` 追加一則 | 格式 `## [YYYY-MM-DD] ingest \| 標題`，內文三到六行：改了哪幾頁、依據什麼來源、做了什麼檢查 |
+| 5 | `03-wiki/log.md` 追加一則 | 格式 `## [YYYY-MM-DD] ingest \| 標題`，內文三到六行：改了哪幾頁、依據什麼來源、做了什麼檢查。`log.md` 已有別的 session 還沒提交的修改時，改寫 `03-wiki/log-append-YYYY-MM-DD.md`，下一輪整併會併回 |
 | 6 | `03-wiki/open-questions.md` 有動靜 | 新的未知進 Active，或某則因為這份來源可以移到 Answered／Stale |
 
 第 6 個常常是「沒有變化」——那也要說出來。**沒有新增 durable knowledge 時，允許 no-op**；
 讀完一份來源不等於必須產生一頁筆記。假裝有收穫比沒收穫更貴。
+
+### 新頁的 frontmatter
+
+```yaml
+status: current        # 有來源撐得住的結論；整頁還只是推論就寫 watchlist；兩份可信來源打架寫 contested
+source: ../02-raw/<主題>/SOURCE.md
+scope: 這份結論在什麼範圍內成立
+authority: authoritative-source
+updated: YYYY-MM-DD
+revisit_when: YYYY-MM-DD   # 內容綁著會變的東西時才寫
+```
+
+- `status` 只回答「這一頁還算不算數」，只有六個值。`candidate` 不在裡面：它可以寫在頁內某一條主張旁邊，
+  整頁都還是候選就用 `watchlist`。
+- **`updated` 不要省。** 自稱 `current` 卻沒有任何日期的頁，沒人判斷得出它多舊，gate 會提醒。
+- **`revisit_when` 給會過期的內容。** 版本、價格、配額、「下個月再決定」這類主張寫一個日期；
+  日期過了 gate 會提醒你回來重驗。研究結論、原理性的東西不必寫——它們不會因為時間到了就失效。
 
 最後跑一次：
 
@@ -68,7 +85,9 @@
 cd ~/my-vault && ./bin/check-routing.sh
 ```
 
-看 `errors` 裡的壞連結與 `warnings` 裡的 orphan 提示。這是你的第二個綠燈。
+`errors` 要是空的；`warnings` 裡**跟這次新頁有關的代謝類 warning 要是零**——詞彙外的 `status`、
+缺日期、`not linked from 03-wiki or 01-profile`（來源資料夾沒被真連結指到）都是這次 ingest 沒做完。
+鏡像與 `STATUS.md` 那兩條是起始狀態，可以先不管。這是你的第二個綠燈。
 
 ---
 
@@ -90,7 +109,8 @@ cd ~/my-vault && ./bin/check-routing.sh
 
 **症狀**：出現「使用者似乎偏好…」「通常會…」這類沒有來源的句子；
 或者一次趕工時說的「這次先這樣」被寫成了永久偏好。
-**修法**：agent 從行為推測的東西一律先標 `status: candidate` 加生效日，或先放進 open questions。
+**修法**：agent 從行為推測的東西一律先當候選：在條目旁標 candidate 加生效日（整頁都是候選就 `status: watchlist`），
+或先放進 open questions。
 **頻率不是同意，沉默不是核准。** 單案才成立的偏好一定要寫 scope，沒寫 scope 它就會被外推。
 
 ### 錯法三：只往檔尾追加，不回頭把過期的狀態標作廢

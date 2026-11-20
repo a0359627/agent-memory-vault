@@ -14,6 +14,15 @@ Registry (`bin/skill-sources.json`) fields that steer the memory mirror:
   就只有列名的專案會進快照，其餘一律跳過。
 - ``primary_memory_project``：放在鏡像 ``claude-memory/`` 根層（而非 ``by-project/<id>/``）
   的那個專案 id。``memory_source`` 為 null 時不會被讀取。
+- ``memory_exclusions``：可選的物件 ``{"<專案 id>": "<為什麼不收>"}``。列在這裡的專案在
+  **讀取任何記憶內容之前**就被跳過，理由必填。它跟 allowlist 相反：allowlist 適合「只收這幾個」，
+  exclusions 適合「全收，但這幾個絕對不要」——例如某個專案的記憶裡有不該進版控的內容。
+  決策會同時留在這份 registry 與 ``snapshot.json`` 的 ``excluded_memory_projects``，
+  所以下一次批次同步讀得到它，不必靠誰記得。排除只影響之後的快照：它不刪來源，
+  也不會把已經 commit 進 git 歷史的舊鏡像清掉。理由欄請寫類別，不要把要保護的內容寫進去。
+
+Origins 也可以帶 ``exclude``（頂層名稱陣列）：來源目錄裡由別的工具管理的子目錄
+（平台自己同步進來的 skill、垃圾桶資料夾）列在這裡，就不會被讀進鏡像。
 
 Platform note: `link` 建立符號連結，因此需要 macOS／Linux（Windows 請走 WSL）。
 """
@@ -45,8 +54,11 @@ def ignored(name):
             or bool(re.match(r'(token|credentials?|client_secret|service-account).*\.json$', name)))
 
 
-def read_tree(root, include=None):
-    """Materialize symlinks in memory; fail on missing inputs or cycles."""
+def read_tree(root, include=None, exclude=None):
+    """Materialize symlinks in memory; fail on missing inputs or cycles.
+
+    `exclude` names top-level entries another tool owns; they are skipped before anything in them is read.
+    """
     root = Path(root)
     if not root.is_dir():
         raise ValueError(f'Missing source directory: {root}')
@@ -67,6 +79,8 @@ def read_tree(root, include=None):
             raise ValueError(f'Unsupported source: {path}')
 
     entries = [root / n for n in include] if include else sorted(root.iterdir())
+    skipped = set(exclude or ())
+    entries = [entry for entry in entries if entry.name not in skipped]
     for entry in entries:
         visit(entry, Path(entry.name), {root.resolve()})
     return result
@@ -102,6 +116,19 @@ class SkillStore:
             if not isinstance(allowlist, list) or any(
                     not isinstance(p, str) or not p or p in ('.', '..') or '/' in p for p in allowlist):
                 raise ValueError('memory_projects must be a list of plain project ids')
+        exclusions = self.registry.get('memory_exclusions', {})
+        if (not isinstance(exclusions, dict) or any(
+                not isinstance(name, str) or not name or name in ('.', '..') or '/' in name or '\\' in name
+                or not isinstance(reason, str) or not reason.strip()
+                for name, reason in exclusions.items())):
+            raise ValueError('memory_exclusions must map plain project ids to a nonempty reason')
+        if self.registry.get('primary_memory_project') in exclusions:
+            raise ValueError('Cannot exclude the primary memory project')
+        for item in self.registry['origins']:
+            skip = item.get('exclude')
+            if skip is not None and (not isinstance(skip, list) or any(
+                    not isinstance(name, str) or not name or name in ('.', '..') or '/' in name for name in skip)):
+                raise ValueError('origin "exclude" must be a list of top-level names')
         self.backup_root = None
 
     def memory_source(self):
@@ -154,7 +181,7 @@ class SkillStore:
         self.links()  # Validate every declared canonical skill before any snapshot mutation.
         payload = {}
         for item in self.registry['origins']:
-            files = read_tree(self.home_path(item['source']), item.get('include'))
+            files = read_tree(self.home_path(item['source']), item.get('include'), item.get('exclude'))
             payload.update({item['id'] + '/' + key: value for key, value in files.items()})
         for item in self.registry['global_files']:
             source = self.home_path(item['source'])
@@ -165,8 +192,13 @@ class SkillStore:
             if not memroot.is_dir():
                 raise ValueError(f'Missing memory source directory: {memroot}')
             allowlist = self.registry.get('memory_projects')
+            exclusions = self.registry.get('memory_exclusions', {})
             for memory in sorted(memroot.glob('*/memory')):
                 project = memory.parent.name
+                # Decided before a single byte of that project's memory is read: a secret scan cannot
+                # recognise someone else's personal details, so the only safe filter is not opening the file.
+                if project in exclusions:
+                    continue
                 # Without an allowlist every project on this machine is captured.
                 if allowlist is not None and project not in allowlist:
                     continue
@@ -241,6 +273,10 @@ class SkillStore:
                         'registry_sha256': digest((self.vault / 'bin/skill-sources.json').read_bytes()),
                         'files': {k: digest(v[0]) for k, v in sorted(payload.items())},
                         'file_modes': {k: v[1] for k, v in sorted(payload.items())}}
+            # Recorded only when there is a decision to record, so vaults without exclusions keep
+            # producing the same snapshot.json as before.
+            if self.registry.get('memory_exclusions'):
+                metadata['excluded_memory_projects'] = self.registry['memory_exclusions']
             old = self.base / 'snapshot.json'
             previous = json.loads(old.read_text()) if old.is_file() else {}
             if not changed and all(previous.get(k) == v for k, v in metadata.items() if k != 'generated_at'):

@@ -3,6 +3,8 @@
 平台：macOS／Linux。Windows 請在 WSL 裡跑（`bin/check-routing.sh` 是 bash，skill 連結用 symlink）。
 需求：`python3` 3.11 以上與 `git`。**零第三方套件**，不需要 `pip install` 任何東西。
 
+已經用 0.1.x 建過 vault 的人不要重跑 bootstrap（它拒絕非空目錄），照 [upgrading.md](upgrading.md) 升級。
+
 ---
 
 ## 三個命令
@@ -54,12 +56,13 @@ cd ~/my-vault && claude        # 或 codex
 ├── 00-inbox/                  還沒分類的輸入
 ├── 01-profile/                你是誰、怎麼跟你合作、環境、反覆咬人的陷阱
 ├── 02-raw/                    不可變原文（只讀，不在這裡下結論）
-├── 03-wiki/                   彙編、index、log、open-questions、記憶代謝規範
+├── 03-wiki/                   彙編、index、log、open-questions、記憶代謝規範、每週整併流程
 ├── 04-projects/               有期限的交付
 ├── 05-skills-drafts/          skill 孵化區（晉升後刪草稿）
 ├── 06-reference/ · 07-archive/  快查表／歸檔（歸檔不冒充 current）
 ├── 08-skill-base/             skill 活檔的可遷移鏡像（只由同步腳本寫）
-└── bin/                       check_vault.py · skill_sync.py · scan-state.sh …
+└── bin/                       check_vault.py · consolidate.py · skill_sync.py · scan-state.sh ·
+                               migrate_status.py · status-vocab.json · 五組 test_*.py …
 
 另有 ONBOARDING.md／MIGRATE.md／99-secrets-encrypted/／.obsidian/，第一天用不到可以先不管。
 ```
@@ -83,15 +86,27 @@ cd ~/my-vault && claude        # 或 codex
 
    安裝器**永遠不覆蓋既有同名目錄**；遇到同名就跳過並警告。八支各是什麼見 [skills/README.md](../skills/README.md)。
 
+   用了 `--register` 之後，要建立平台入口並同步一次鏡像，檢查才會是綠的
+   （沒做的話 `check-routing.sh` 會報 `Shared runtime is not linked to canonical sources`）：
+
+   ```bash
+   cd ~/my-vault && python3 bin/skill_sync.py link --apply && ./08-skill-base/sync-to-vault.sh --apply
+   ```
+
 ---
 
 ## 隨時可以跑的自檢
 
 ```bash
-cd ~/my-vault && ./bin/check-routing.sh          # 規則入口、skill 來源、wiki 連結
+cd ~/my-vault
+./bin/check-routing.sh                             # 規則入口、skill 來源、wiki 連結、記憶代謝
+python3 bin/consolidate.py                         # 唯讀：這週整併該看哪裡
+python3 -B -m unittest discover -s bin -p 'test_*.py'   # bin/ 的五組自測
 ```
 
-第一次跑（還沒同步過 skill 鏡像）鏡像檢查只會給 warning，不是錯誤。
+剛建好的 vault 跑 check 只會有兩條 warning：還沒同步過 skill 鏡像、還沒有 `STATUS.md`。
+那是起始狀態，不是錯誤。之後你寫進來的頁面若缺日期、`status` 寫了詞彙外的值、來源資料夾沒被連到，
+會多出代謝類的 warning；它們不擋 commit，但該有人看。只有 `errors` 非空才 exit 1。
 每道閘門各在檢查什麼、紅了代表什麼，見 [gates.md](gates.md)。
 
 ---
@@ -101,6 +116,7 @@ cd ~/my-vault && ./bin/check-routing.sh          # 規則入口、skill 來源�
 | 你想知道 | 讀這個 |
 |---|---|
 | 這套設計的骨架與三個原則 | [concepts.md](concepts.md) |
+| 從 0.1.x 升級 | [upgrading.md](upgrading.md) |
 | 第一次把來源沉澱進來 | [walkthrough-first-ingest.md](walkthrough-first-ingest.md) |
 | 第一次把一段工作抽成 skill | [walkthrough-first-skill.md](walkthrough-first-skill.md) |
 | skill 的草稿→活檔→鏡像→還原 | [skills-and-sync.md](skills-and-sync.md) |

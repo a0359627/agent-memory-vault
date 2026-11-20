@@ -77,7 +77,19 @@ description: 把這週的零散進度整理成一頁對外週報。當使用者�
 規則只有三條：`name` 必須小寫、必須等於資料夾名稱；`description` 要寫**何時使用**（含觸發語）；
 frontmatter 只放 `name` 與 `description`——這是兩個平台都吃得下的最小交集。
 
-旁邊開一份 `notes.md`，之後每次實跑就記一行。
+旁邊開一份 `notes.md`，之後每次實跑就記一行：日期、哪個 session、觸發了沒、輸出要不要大改。
+晉升時你要從這份檔案**數**出次數，不是回想。
+
+想讓它在圖譜上看得到，可以順手開一張草稿期的導航卡 `03-wiki/skill-weekly-status.md`
+（範本見 [templates/skill-card.md](templates/skill-card.md)，記得從 `03-wiki/skills.md` 連過去，否則它是孤兒頁）。
+狀態那幾行這樣寫：
+
+```yaml
+type: skill-card
+status: watchlist          # 這張卡描述的東西還在孵化
+subject_status: draft
+updated: YYYY-MM-DD
+```
 
 **Codex 讀者可以少打一半的字**：這個 repo 的 office kit 附了現成的鷹架與驗證器，
 `office-agent-starter-kit/.agents/skills/build-office-skill/scripts/` 底下的 `create_skill.py`
@@ -102,7 +114,14 @@ frontmatter 只放 `name` 與 `description`——這是兩個平台都吃得下�
 第 3 類最常被跳過，也最貴。一支會亂觸發的 skill 比沒有 skill 糟：
 它每次都要佔 context，而你還得花力氣叫它閉嘴。
 
-跑到「五類都穩定」才算可以晉升。**還沒穩定就是還在孵化，不是失敗。**
+五類都穩定之後，再對一次晉升門檻。**三條都成立才晉升**：
+
+1. **跨 2 個 session 真用了 3 次。** `notes.md` 裡數得出來；同一個 session 裡連跑三次只算一次的運氣。
+2. **步驟能無歧義寫出。** 換一個沒看過這段對話的 agent，照正文跑得出同樣的結果。
+3. **需要的工具在當前環境找得到。** `command -v <工具>` 有回應，不是「我記得有裝」。
+
+一次幸運的成功是一筆紀錄，不是一支 skill。門檻太鬆的下場是一堆從來沒被叫過的 skill，
+每一支都在佔觸發判斷的注意力。**還沒到門檻就是還在孵化，不是失敗。**
 
 ---
 
@@ -113,6 +132,7 @@ frontmatter 只放 `name` 與 `description`——這是兩個平台都吃得下�
 **A. 跨專案通用 → 搬到共用活檔位置**
 
 ```bash
+mkdir -p ~/.claude/skills            # 從沒裝過 skill 的話，這個目錄還不存在
 mv ~/my-vault/05-skills-drafts/weekly-status ~/.claude/skills/weekly-status   # Claude Code
 # Codex 的使用者 skill 目錄是 ~/.agents/skills/
 ```
@@ -133,7 +153,22 @@ python3 agent-memory-vault/tools/install_skills.py grill-me --platform codex --a
 **B. 只對某個 repo 成立 → 搬到那個 active repo**，由 code、設定與測試一起版控。
 
 不論走哪一條，都在 `03-wiki/log.md` 追加一則 `promote`，
-並在 `03-wiki/skill-<name>.md` 建一張導航卡（**只導航，不複製整份 skill 正文**）。
+並更新（或新建）導航卡 `03-wiki/skill-weekly-status.md`（**只導航，不複製整份 skill 正文**）。
+晉升之後卡片的狀態欄位變成：
+
+```yaml
+type: skill-card
+status: current                               # watchlist → current
+subject_status: active                        # draft → active
+updated: YYYY-MM-DD
+verified_at: YYYY-MM-DD                       # 你最後一次確認活檔還在、還適用的日期
+verification: 實跑了一次                       # 老實寫做到哪一層
+promoted_from: 05-skills-drafts/weekly-status
+```
+
+`verified_at` 是這張卡的保鮮期。`current` 的 skill 卡沒有它、或它超過 180 天，
+`./bin/check-routing.sh` 會提醒你回來看：活檔還在嗎、觸發情境還成立嗎。
+沒人驗過的舊 skill 比沒有 skill 更糟，因為它會很有把握地照舊流程做。
 
 ---
 
@@ -179,7 +214,7 @@ python3 bin/skill_sync.py link --apply          # 建立連結（舊副本先備
 驗收：
 
 ```bash
-python3 bin/test_skill_sync.py      # 同步引擎自測，全在暫存目錄跑
+python3 -B -m unittest discover -s bin -p 'test_*.py'   # bin/ 的五組自測，全在暫存目錄跑
 ```
 
 ---

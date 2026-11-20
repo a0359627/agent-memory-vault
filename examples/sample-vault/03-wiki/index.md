@@ -16,7 +16,8 @@ type: hub
 - **要寫這週的客戶報告**：[[skill-weekly-client-report]]，照卡上的觸發條件與完成判準走。
 - **客戶又丟了一堆回饋**：[[skill-client-feedback-triage]]（還是草稿，只在一個客戶身上驗證過，用之前先讀限制）。
 - **要沉澱新來源**：原文進 `02-raw/`、結論進 `03-wiki/`；分界看 [[ref-client-brief-2026-01]] 這組示範。
-- **不確定某件事現在是否還成立**：查 [[open-questions]]，以及該頁 frontmatter 的 `status`。
+- **不確定某件事現在是否還成立**：查 [[open-questions]]，以及該頁 frontmatter 的 `status`
+  （`current` 以外都先重驗；專案或 skill 自己做到哪看 `subject_status`）。
 - **快要踩坑了**：[[03-known-traps]]，四條都附可貼上的修法。
 
 ## 主題叢集（star hubs）
@@ -25,7 +26,7 @@ type: hub
 
 ## 索引頁（分類清單）
 
-- [[projects]] — 所有 project 分叢集列出（含 status）。
+- [[projects]] — 所有 project 分叢集列出（含專案狀態，即卡片的 `subject_status`）。
 - [[skills]] — 所有 skill，分 Active／Draft。
 - [[open-questions]] — 會妨礙未來協助的未知／爭議；分 Active、Answered、Stale。
 
@@ -38,9 +39,10 @@ type: hub
 
 ## Review
 
-- [[review-2026-02-14-first-month]] — 第一個月回顧（`frozen`）：逐案 evidence 與誠實狀態，
+- [[review-2026-02-14-first-month]] — 第一個月回顧（`historical`）：逐案 evidence 與誠實狀態，
   把「上線了」拆成 committed／deployed／client accepted。
 
 ## 維護
 
-- 變更紀錄見 [[log]]（append-only，八則）。這個 vault 的每一頁都能在那裡找到出處。
+- 變更紀錄見 [[log]]（append-only，十則）。這個 vault 的每一頁都能在那裡找到出處。
+- [[vault-consolidation]] — 定期整併：每週五跑一輪，把 log 碎片併回、修壞連結、看代謝 warning；需要判斷的只提案。

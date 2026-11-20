@@ -2,7 +2,8 @@
 
 放在 `03-wiki/review-<YYYY-MM-DD>-<主題>.md`。
 **寫完就凍結**：後續有新結論就寫一份新的 review 取代它，不回頭改舊的。
-所以 frontmatter 的 `status:` 從一開始就寫 `frozen`——這一頁沒有「current」的階段，它記的是當時知道什麼。
+所以 frontmatter 的 `status:` 從一開始就寫 `historical`——這一頁沒有「current」的階段，它記的是當時知道什麼。
+（0.1.x 的範本寫的是 `frozen`；`bin/migrate_status.py` 會把舊的 review 一次改過來。）
 
 這份範本只有一個重點：**兩欄——一欄證據，一欄誠實狀態。**
 沒有證據的那一列，狀態欄就寫「未驗證」，不要補話。
@@ -13,7 +14,7 @@
 ---
 title: Review — <主題>（<期間>）
 type: review
-status: frozen
+status: historical
 updated: <YYYY-MM-DD>
 scope: <這份盤點涵蓋什麼、不涵蓋什麼>
 ---

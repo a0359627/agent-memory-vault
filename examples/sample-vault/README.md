@@ -9,31 +9,34 @@
 
 小明是一人工作室的負責人，偶爾找小華接案支援，主要做小店家的網站與內容。
 2026-01-04 建立這個 vault，到 2026-02-20 為止累積了兩個客戶（甲咖啡館、乙書室）、
-兩個專案、一支已晉升的 skill、一支還在孵化的草稿，以及四條被咬出來的陷阱。
+兩個專案、一支已晉升的 skill、一支還在孵化的草稿，以及四條被咬出來的陷阱；最後一天開始每週跑一次整併。
 
 ## 怎麼讀（15 分鐘）
 
-1. **先讀 [03-wiki/log.md](03-wiki/log.md)。** 八則紀錄就是這個 vault 的劇本，
-   從 `init` 到 `supersede` 各一則。其餘每一頁都能在 log 裡找到它是哪一則寫出來的。
+1. **先讀 [03-wiki/log.md](03-wiki/log.md)。** 十則紀錄就是這個 vault 的劇本，
+   九種 type 從 `init` 到 `lint` 都有（`update` 兩則，其中一則是從 log 碎片併回來的）。其餘每一頁都能在 log 裡找到它是哪一則寫出來的。
 2. **再讀 [03-wiki/index.md](03-wiki/index.md)。** 看一個長好之後的入口長什麼樣：
    六條導航路徑指向的是「現在該讀哪一頁」，不是全部檔案的清單。
 3. **然後挑三組對照看：**
    - **未晉升 vs 已晉升**：[03-wiki/skill-client-feedback-triage.md](03-wiki/skill-client-feedback-triage.md)
-     （只有一個客戶驗證過，`draft`）對照
-     [03-wiki/skill-weekly-client-report.md](03-wiki/skill-weekly-client-report.md)（兩個客戶各三週，`active`）。
-     兩張卡的差別就是抽取門檻。
+     （只有一個客戶驗證過：`status: watchlist`、`subject_status: draft`）對照
+     [03-wiki/skill-weekly-client-report.md](03-wiki/skill-weekly-client-report.md)（兩個客戶各三週：`status: current`、`subject_status: active`，
+     帶 `verified_at` 與 `promoted_from`）。兩張卡的差別就是抽取門檻。
    - **被取代的主張**：[03-wiki/proj-weekly-report-bot.md](03-wiki/proj-weekly-report-bot.md)
      頁頂是現行有效段，底下整段舊設計標 `superseded` 留著。歷史不刪，但也不准冒充現況。
+     取代的是一個段落，所以整頁仍是 `status: current`，不寫 `superseded_by`。
    - **誠實的狀態**：[03-wiki/review-2026-02-14-first-month.md](03-wiki/review-2026-02-14-first-month.md)
      把口語的「上線了」拆成 committed／deployed／client accepted 三種證據。
 4. **最後看原文與彙編的分工**：[02-raw/client-brief-2026-01/](02-raw/client-brief-2026-01/SOURCE.md)
    是不可變原文（收進來就不再編輯），[03-wiki/ref-client-brief-2026-01.md](03-wiki/ref-client-brief-2026-01.md)
    才是可以被新證據修訂的結論頁。
 
-## 這裡刻意示範的六件事
+## 這裡刻意示範的八件事
 
 | 做法 | 去哪一頁看 |
 |---|---|
+| frontmatter 兩軸：`status` 記這一頁還算不算數，`subject_status` 記專案自己做到哪；`revisit_when` 寫成條件 | [03-wiki/proj-brand-site-relaunch.md](03-wiki/proj-brand-site-relaunch.md) |
+| log 碎片與每週整併：碎片依日期原文併回 log，整併本身記一則標題含「定期整併」的 `lint` | [03-wiki/vault-consolidation.md](03-wiki/vault-consolidation.md) |
 | 高影響主張帶 `status`／`source`／`observed_at`／`scope`／`authority`／`confidence`／`revisit_when` | [03-wiki/ref-client-brief-2026-01.md](03-wiki/ref-client-brief-2026-01.md) |
 | 偏好分 `current` 與 `candidate`，範圍受限的另開一節 | [01-profile/01-preferences.md](01-profile/01-preferences.md) |
 | Open question 從 Active 走到 Answered，答案要記 Authority | [03-wiki/open-questions.md](03-wiki/open-questions.md) |
@@ -44,10 +47,19 @@
 ## 這裡刻意**沒有**的東西
 
 - 沒有 `AGENT-RULES.md`／`ROUTING.md`／`CLAUDE.md` 這些根目錄規範檔——那些在 `template/` 有完整版，
-  這個範例只示範內容頁怎麼長。
+  這個範例只示範內容頁怎麼長。`03-wiki/memory-metabolism.md` 也是規範頁，同樣只在 `template/`。
+  例外是 [03-wiki/vault-consolidation.md](03-wiki/vault-consolidation.md)：bootstrap 建出來的主 vault 有它的完整版，
+  這裡放的是小明填完自己選擇之後的短版，讓你看到「填好長什麼樣」。
 - 沒有 `99-secrets-*`。範例不需要秘密，你的 vault 也不該把秘密的**值**寫進 Markdown。
 - 沒有 `08-skill-base/` 鏡像。已晉升的那支 skill 放在 `skills-promoted/` 只是為了讓你在同一個資料夾裡
   看到它；真實 vault 的活檔位置由 `ROUTING.md` 決定。
+
+## 這份範例的「今天」是 2026-02-20
+
+劇情停在 2026-02-20，所以頁面上的日期都以那一天為準。這份範例沒有自己的 `bin/`，平常不會有人對它跑檢查；
+如果你把它的頁面搬進自己的 vault 再跑 `./bin/check-routing.sh`，已晉升那張 skill 卡會被報
+`verified_at` 超過 180 天。那不是範例壞了，而是這條 gate 正在做它該做的事：
+一張半年沒人回來確認的 skill 卡，就該有人打開看一眼。
 
 ## 你可以拿它做什麼
 

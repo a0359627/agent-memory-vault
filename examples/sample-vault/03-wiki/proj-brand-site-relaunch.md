@@ -1,7 +1,8 @@
 ---
 title: 甲咖啡館 形象網站改版
 type: project
-status: pilot
+status: current
+subject_status: pilot
 updated: 2026-02-14
 verification: local-preview-plus-client-written-feedback
 last_execution_evidence: 2026-02-12
@@ -18,8 +19,10 @@ revisit_when: 客戶以文字確認驗收，或決定要不要做口頭提過的
 
 ## 現況（2026-02-14）
 
-`pilot`。首頁與菜單頁已做完並在本機預覽給客戶看過，客戶用信件回了兩點修改意見（有文字，算數）。
-**尚未部署**，因此也還沒有驗收。狀態不寫 `production` 的理由很簡單：沒有人類驗收就不能寫。
+專案狀態 `pilot`（寫在 `subject_status`）。首頁與菜單頁已做完並在本機預覽給客戶看過，客戶用信件回了兩點修改意見（有文字，算數）。
+**尚未部署**，因此也還沒有驗收。專案狀態不寫 `production` 的理由很簡單：沒有人類驗收就不能寫。
+這張卡本身的 `status` 是 `current`：上面的描述到 2026-02-14 為止都對。frontmatter 的 `revisit_when`
+寫的是條件不是日期——客戶以文字驗收、或訂位／社群牆有了決定，這張卡就要回來重驗。
 
 | 層級 | 2026-02-14 的證據 | 誠實狀態 |
 |---|---|---|

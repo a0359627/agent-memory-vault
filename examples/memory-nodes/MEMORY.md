@@ -13,6 +13,10 @@
 > 這裡**只記** session 累積的 correction 與縮寫解碼，不重複那邊的結構化內容。
 > 兩邊都寫會分歧，而分歧的時候沒人知道該信哪一份。
 
+節點欄位照 starter 的記憶節點範本：Why／How to apply／scope／source 之外，還有 authority、status、
+observed_at 與 revisit_when。**project 型節點的 observed_at 與 revisit_when 必填，而且寫進 frontmatter**——
+專案型記憶超過 90 天又沒有 `revisit_when`，vault 的檢查器會提醒（registry 開了記憶來源之後才會掃）。
+
 ## 這一層和 vault 的分工
 
 | | vault（`01-profile/`、`03-wiki/`） | 這一層（auto-memory 節點） |

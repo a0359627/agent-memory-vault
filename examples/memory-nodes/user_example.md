@@ -14,6 +14,11 @@ metadata:
 
 **source：** vault 的 `01-profile/00-who.md`（canonical）。本節點只是它的短版指標。
 
+- **authority：** `user-confirmed`（那一頁是小明自己寫的）
+- **status：** `current`
+- **observed_at：** 2026-02-20
+- **revisit_when：** 工作室多了全職員工，或客戶組成改變時。
+
 **Why:** agent 每次都要重新問「你是做什麼的」很浪費；但更重要的是**別把它寫太滿**——
 偏好、環境、陷阱各有 canonical 頁，複製過來只會分歧。這裡只留「定位」這一件事。
 

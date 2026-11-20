@@ -8,11 +8,22 @@
 - 旁邊放一份 `notes.md` 記實跑觀察：跑過幾次、哪次沒觸發、哪次輸出要大改。
   晉升與否靠這份 notes，不靠印象。
 
+## 晉升門檻
+
+三條都成立才晉升；一次幸運的成功是一筆紀錄，不是一支 skill：
+
+1. 至少跨 2 個 session 真正用過 3 次（`notes.md` 裡數得出來）。
+2. 步驟能無歧義寫出：換一個沒看過這段對話的 agent 也跑得出同樣的結果。
+3. 所需工具在當前環境找得到（`command -v <tool>` 有回應），不是「我記得有裝」。
+
+草稿期間，它的卡片 `03-wiki/skill-<name>.md` 標 `status: watchlist`。
+
 ## 晉升路徑（單向）
-1. 在這裡草擬、實測跑通。
+1. 在這裡草擬、實測跑通，達到上面的門檻。
 2. 穩定後擇一：
    - 通用能力 → 搬到共用活檔位置（例如 `~/.claude/skills/<name>/`），再跑 `08-skill-base/sync-to-vault.sh`。
    - 只對特定專案成立 → 搬到該 active project repo，由 code／manifest／測試一起版控。
-3. 晉升後**刪掉這裡的草稿**，避免兩份分歧版本；在 `03-wiki/log.md` 追加一則 `promote`。
+3. 晉升後**刪掉這裡的草稿**，避免兩份分歧版本；卡片改 `status: current`，記 `promoted_from` 與
+   `verified_at`；在 `03-wiki/log.md` 追加一則 `promote`。
 
 若你有舊知識庫，明確標記它**不再是晉升目的地**：舊庫只能當歷史證據，不接收新 skill。

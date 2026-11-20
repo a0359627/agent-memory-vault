@@ -1,6 +1,6 @@
 # agent-memory-vault
 
-**給 Claude Code／Codex 使用者的記憶庫起手式**——五分鐘長出一個會代謝的 Markdown 第二大腦、一層 agent 規則、一組 skill 抽取與同步工具，以及一套把「不能外洩」寫成可執行閘門的發布工具。
+**給 Claude Code／Codex 使用者的記憶庫起手式**——五分鐘長出一個會代謝的 Markdown 第二大腦、一層 agent 規則、一組 skill 抽取與同步工具、一批讓「過期的記憶會被看見」的檢查與每週整併流程，以及一套把「不能外洩」寫成可執行閘門的發布工具。
 
 ![license MIT](https://img.shields.io/badge/license-MIT-green)
 ![lang zh-TW](https://img.shields.io/badge/lang-zh--TW-blue)
@@ -35,7 +35,7 @@ cd ~/my-vault && claude        # 或 codex
 ├── 04-projects/ 05-skills-drafts/ 06-reference/ 07-archive/
 ├── 08-skill-base/      skill 活檔的鏡像（由工具產生，不手寫）
 ├── 99-secrets-local/   已 gitignored：只記「去哪裡找」，不記值
-├── bin/                check_vault.py／skill_sync.py／check-routing.sh，零相依
+├── bin/                check-routing.sh／consolidate.py／skill_sync.py／scan-state.sh 與自測，零相依
 └── .git/               第一個 commit 已經建好，第一個綠燈也已經亮過
 
 另有 ONBOARDING.md／MIGRATE.md／99-secrets-encrypted/／.obsidian/，第一天用不到可以先不管。
@@ -45,6 +45,8 @@ cd ~/my-vault && claude        # 或 codex
 
 - [**第一次 ingest**](docs/walkthrough-first-ingest.md) — 拿一份真的來源走完一輪代謝：原文進 `02-raw/`、結論進 `03-wiki/`、未決的進 open-questions、log 追加一行。含三種常見錯法。
 - [**第一支 skill**](docs/walkthrough-first-skill.md) — 從「這段工作值不值得抽」的自測開始，寫草稿、跑五類測試、登錄、同步到另一個平台、再讓檢查器驗一次。
+
+已經用 0.1.x 建過 vault？照 [升級指南](docs/upgrading.md) 走；這一版改了什麼見 [CHANGELOG](CHANGELOG.md)。
 
 其餘文件：[快速開始](docs/quickstart.md)、[核心概念](docs/concepts.md)、[閘門怎麼運作](docs/gates.md)、[把自己的 vault 公開出去](docs/publishing-your-vault.md)、[參考文獻](docs/REFERENCES.md)、[常見問題](docs/faq.md)、[八份範本](docs/templates/)。
 
@@ -69,6 +71,18 @@ flowchart LR
 ```
 
 三層不是三個資料夾的美學問題：**人選的原文**、**agent 寫給人讀的彙編**、**兩邊都必須遵守的規範**，混在一起就沒辦法分辨「這句是誰說的、憑什麼、還算不算數」。
+
+## 代謝要有東西在跑
+
+「過期的要標出來、被取代的要留下取代關係」寫成規範很容易，難的是讓它真的發生。所以規範旁邊配了兩個會動的零件：
+
+- **會響的檢查。** 每一頁的 `status` 只回答「這一頁的理解還算不算數」（專案自己的狀態另外寫在 `subject_status`）。
+  `./bin/check-routing.sh` 會對寫錯的狀態、過了重驗日期的頁、太久沒人驗的 skill 卡、沒有任何日期的現行頁、
+  沒被連結到的來源資料夾發 warning。它不擋你寫入，只負責讓該看的東西看得見。
+- **每週一次的整併。** `python3 bin/consolidate.py` 列出這一週該看哪裡；機械性的修正直接做，
+  「這頁該不該標過期」這類判斷只提案、由你決定。流程在 vault 自己的 `03-wiki/vault-consolidation.md`。
+
+沒有排程的遺忘規則只是一段文字。為什麼這樣設計見 [核心概念](docs/concepts.md) 第 5 節。
 
 ## 三個原則
 
@@ -95,7 +109,7 @@ flowchart LR
 
 ## 這套做法從哪來
 
-三層結構借自 Karpathy 的 LLM Wiki 模型，資料夾的「按可行動性分類」借自 Forte 的 PARA，而「記憶要能被更正、取代、遺忘」則是本 repo 先長出來、後來才發現與 LangChain OpenWiki 殊途同歸。skill 的寫法與抽取門檻借自 Matt Pocock 的 skills 倉庫，但整組只收了三支。每一項借了什麼、**刻意不借什麼、為什麼**，逐條記在 [docs/REFERENCES.md](docs/REFERENCES.md)——那頁也標明哪些來源是本 repo 真的落地實作、哪些只是引用。
+三層結構借自 Karpathy 的 LLM Wiki 模型，資料夾的「按可行動性分類」借自 Forte 的 PARA，而「記憶要能被更正、取代、遺忘」則是本 repo 先長出來、後來才發現與 LangChain OpenWiki 殊途同歸。skill 的寫法與抽取門檻借自 Matt Pocock 的 skills 倉庫，但整組只收了三支。離線整併的想法與「每個 session 開場載入的那一層要保持精簡」借自 Anthropic 談 agent 記憶分層的文章（每週一次與 200 行是這裡自己訂的）；錯誤升級階梯、改前估爆炸半徑與回報形狀借自 pstack 這套 agent 工作流，只收方法、不裝它的總控。每一項借了什麼、**刻意不借什麼、為什麼**，逐條記在 [docs/REFERENCES.md](docs/REFERENCES.md)——那頁也標明哪些來源是本 repo 真的落地實作、哪些只是引用。
 
 ## 這個 repo 不是什麼
 
@@ -106,7 +120,9 @@ flowchart LR
 
 ## 閘門
 
-`bin/gate.sh --public` 一次跑完：三層發布掃描（L1 secret 樣式／L2 識別字 HMAC／L3 結構與形狀）、第二套獨立掃描器交叉比對、單元測試、skill 同步引擎自測、office kit 驗證器、乾淨 HOME 的端到端 smoke、參考文獻頁一致性、git 歷史與 remote URL 掃描、零 symlink——任一步非 0 即停。每道閘門在做什麼、失敗代表什麼、以及 HMAC 那層已知抓不到什麼，見 [docs/gates.md](docs/gates.md)。
+這一節講的是**發布端**的閘門（要把東西公開時用）；你的 vault 日常用的那一組見上面的「代謝要有東西在跑」與 [docs/gates.md](docs/gates.md) 第一部分。
+
+`bin/gate.sh --public` 一次跑完：三層發布掃描（L1 secret 樣式／L2 識別字 HMAC／L3 結構與形狀）、第二套獨立掃描器交叉比對、單元測試、vault 工具自測（同步引擎、代謝檢查、狀態拆軸、活動快照、整併）、office kit 驗證器、乾淨 HOME 的端到端 smoke、參考文獻頁一致性、git 歷史與 remote URL 掃描、零 symlink——任一步非 0 即停。每道閘門在做什麼、失敗代表什麼、以及 HMAC 那層已知抓不到什麼，見 [docs/gates.md](docs/gates.md)。
 
 > ⚠️ **掃描器不保證抓到所有機敏資料。** 別稱、暱稱、拼音、縮寫，以及「幾件事湊起來就能反推」的敘述，只有人讀得出來。公開任何東西之前請自己全文讀一遍——這是最後一道、也是唯一真正有效的那道閘門。
 

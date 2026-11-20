@@ -19,10 +19,10 @@
 ## 1. `sample-vault/` — 長好之後長什麼樣
 
 一個一人工作室用了六週的知識庫：兩個客戶、兩個專案、一支已晉升的 skill、
-一支還在孵化的草稿、四條被咬出來的陷阱，以及一次誤寄事故。
+一支還在孵化的草稿、四條被咬出來的陷阱、一次誤寄事故，以及事故後的第一輪定期整併。
 
 入口是 [sample-vault/03-wiki/log.md](sample-vault/03-wiki/log.md)：
-八則紀錄剛好是八種 type（`init`／`ingest`／`update`／`promote`／`draft`／`answer`／`review`／`supersede`），
+十則紀錄涵蓋九種 type（`init`／`ingest`／`update`／`promote`／`draft`／`answer`／`review`／`supersede`／`lint`），
 而且其餘每一頁都能在那裡找到它是哪一則寫出來的。**從 log 讀起，不要從資料夾讀起。**
 
 （其中 `draft` 與 `answer` 是這個範例 vault **自訂**的。`template/03-wiki/log.md` 的基本表是七個
@@ -31,13 +31,15 @@ type，自訂可以，但要像範例那樣在 log 檔頭寫明是自訂的—�
 裡面刻意示範三組對照：
 
 - **未晉升 vs 已晉升**：一支只在單一客戶驗證過的草稿，對照一支兩客戶各三週、換人可重現的活檔。
-  兩張卡的差別就是抽取門檻長什麼樣。
+  兩張卡的差別就是抽取門檻長什麼樣；frontmatter 也是一組對照：草稿卡是 `status: watchlist` 加
+  `subject_status: draft`，已晉升的是 `current` 加 `active`，並帶 `verified_at`。
 - **現行 vs 被取代**：一張 project card 頁頂是現行有效段，底下整段舊設計標 `superseded` 留著。
-  歷史不刪，但也不准冒充現況。
+  歷史不刪，但也不准冒充現況。（取代的是段落，整頁仍是 `status: current`；專案狀態另寫在 `subject_status`。）
 - **做完了 vs 上線了 vs 驗收了**：一份 review 把口語的「上線了」拆成
   committed／deployed／client accepted 三欄證據，其中一欄整個月都是空的。
 
-導讀見 [sample-vault/README.md](sample-vault/README.md)。
+0.2.0 的新寫法也都在裡面：兩軸 frontmatter、寫成條件的 `revisit_when`、review 的 `historical`、
+一則從 log 碎片併回的紀錄，以及每週整併的流程頁。導讀見 [sample-vault/README.md](sample-vault/README.md)。
 
 ## 2. `first-skill/` — 一支夠用的第一支 skill
 

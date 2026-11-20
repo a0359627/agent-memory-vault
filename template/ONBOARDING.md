@@ -52,6 +52,7 @@ AI 的整理先是 candidate；沒有足夠來源、scope 或人類確認，不�
 | 目前有哪些專案、各自什麼狀態 | [[projects]] |
 | 目前有哪些 skill、分幾條線 | [[skills]] |
 | 記憶如何形成、更正、取代、過期與遺忘 | [[memory-metabolism]]／[[open-questions]] |
+| 每週的整理怎麼跑、哪些可以直接改 | [[vault-consolidation]] |
 
 ---
 
@@ -70,6 +71,8 @@ AI 的整理先是 candidate；沒有足夠來源、scope 或人類確認，不�
 依 [[memory-metabolism]] 標來源、時間、scope、authority 與狀態 → 將未決問題維護在 [[open-questions]] →
 更新 `03-wiki/index.md` → append 一行到 `03-wiki/log.md`（格式 `## [YYYY-MM-DD] ingest | 標題`）。
 新證據改變舊理解時要建立取代／爭議關係，不可靜默覆寫。
+`log.md` 已有別人未提交的修改時，改寫碎片 `03-wiki/log-append-YYYY-MM-DD.md`，不要疊上去。
+交付前跑 `./bin/check-routing.sh`：error 要修，warning 要看過（它們是代謝規範的可執行版本）。
 
 **Secrets 鐵律**（跨越所有任務，優先權高於「把事情做完」）：
 - 任何 API key / token / 密碼的**值**絕不寫入這個 vault 的任何檔案，也絕不出現在你的

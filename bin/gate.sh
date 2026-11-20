@@ -105,8 +105,8 @@ run_public() {
   step "單元測試"
   python3 -m unittest discover -s tests -p 'test_*.py'
 
-  step "skill 同步工具自測"
-  python3 bin/test_skill_sync.py
+  step "vault 工具自測（bin/test_*.py：同步引擎、代謝 gate、狀態拆軸、活動快照、整併）"
+  python3 -m unittest discover -s bin -p 'test_*.py'
 
   step "office kit 結構驗證"
   python3 office-agent-starter-kit/tools/validate_kit.py

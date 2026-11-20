@@ -1,6 +1,6 @@
 # Skills 與同步 — 從一個想法到換一台機器也還在
 
-這頁講整條鏈：**抽取門檻 → 草稿 → 活檔 → registry → 鏡像 → 還原。**
+這頁講整條鏈：**抽取門檻 → 草稿 → 晉升門檻 → 活檔 → registry → 鏡像 → 還原。**
 第一次要動手做，走 [walkthrough-first-skill.md](walkthrough-first-skill.md)；這頁是它的參考手冊。
 
 ---
@@ -12,7 +12,8 @@
       │
       ▼
 05-skills-drafts/<name>/  ← 孵化區。SKILL.md ＋ notes.md（實跑觀察）
-      │  穩定之後單向晉升，並刪掉草稿
+      │  晉升門檻：跨 2 個 session 真用 3 次 ＋ 步驟無歧義 ＋ 工具找得到
+      │  三條都成立才單向晉升，並刪掉草稿
       ▼
 共用活檔 ~/.claude/skills/<name>/     或     active repo 內
       │        （唯一可以手改正文的地方）
@@ -33,13 +34,26 @@ restore-from-vault.sh     ← 新機器上還原回活檔位置
 
 ---
 
-## 二、抽取門檻（兩條都中才抽）
+## 二、兩道門檻：抽取與晉升
+
+**抽取（兩條都中才開草稿）**
 
 1. **會再用到**（下個月、下個客戶、下個專案還會做一次）；
 2. **有判斷含量**（有取捨、有判準、有容易踩的坑）。
 
 只有第 1 條 → 寫成腳本。只有第 2 條 → 這次好好想一次就好。
 第三個問題決定它住哪：跨專案的進共用活檔，單一 repo 的留在那個 repo。
+
+**晉升（三條都成立才離開 `05-skills-drafts/`）**
+
+1. 至少跨 2 個 session 真正用過 3 次，`notes.md` 裡數得出來；
+2. 步驟能無歧義寫出：換一個沒看過這段對話的 agent 也跑得出同樣的結果；
+3. 所需工具在當前環境找得到（`command -v` 有回應），不是「我記得有裝」。
+
+抽取門檻防的是「不該存在的 skill」，晉升門檻防的是「還沒準備好就上線的 skill」。
+晉升後導航卡從 `status: watchlist` 改成 `current`，記 `promoted_from` 與 `verified_at`；
+`verified_at` 超過 180 天，`./bin/check-routing.sh` 會提醒你回來重驗。
+這個計數只用在做法，不用在偏好：偏好出現三次不代表對方同意過。
 
 **哪些類型的 skill 值得你自己長出來**（只講類型，因為內容一定綁你的脈絡）：
 
@@ -86,10 +100,11 @@ frontmatter **只放 `name` 與 `description`**——這是 Claude Code 與 Code
 | `shared_source` | 共用 skill 的**活檔**目錄（正文只在這裡改） |
 | `shared_runtime` | 另一個平台的入口目錄；裡面放的是指向活檔的符號連結，不是副本 |
 | `shared_skills` | 你要跨平台共用的 skill 名稱陣列。空陣列＝還沒有 |
-| `origins` | 要快照的 skill 來源，每筆 `{id, source}`；專案專用的 skill 用 `origin-<project>` 這類 id |
+| `origins` | 要快照的 skill 來源，每筆 `{id, source}`；專案專用的 skill 用 `origin-<project>` 這類 id。可選的 `exclude`（頂層名稱陣列）跳過由別的工具管理的子目錄 |
 | `global_files` | 要一起快照的平台全域設定檔 |
 | `memory_source` | 平台專案記憶的根目錄。**出廠值是 `null`＝不同步任何記憶**（見下一節） |
 | `memory_projects` | 可選的 allowlist：只收這幾個專案 id 的記憶 |
+| `memory_exclusions` | 可選的排除清單 `{專案 id: 不收的理由}`：這幾個專案的記憶一個 byte 都不讀 |
 | `primary_memory_project` | 放在鏡像根層（而非 `by-project/<id>/`）的那個專案 id |
 
 沒登錄進 `shared_skills` 的 skill 不會進鏡像、不會被 `check-routing.sh` 檢查，
@@ -121,6 +136,29 @@ python3 agent-memory-vault/tools/install_skills.py <name> --apply \
 }
 ```
 
+### allowlist 與排除清單怎麼分工
+
+`memory_projects` 回答「收哪些」，`memory_exclusions` 回答「哪些絕對不收」。
+只想收少數幾個專案就用前者；大致全收、但有幾個專案的記憶不該進版控，就用後者：
+
+```json
+"memory_exclusions": {
+  "<專案 id>": "<為什麼不收>"
+}
+```
+
+兩者同時列到同一個專案時，排除優先。幾個要知道的行為：
+
+- **排除發生在讀取之前。** 同步器看到這個專案 id 就跳過，不打開裡面任何檔案。
+  這是唯一安全的做法：secret 掃描認得出 key 的形狀，認不出個人資料。
+- **決策有紀錄。** 有排除清單時，`snapshot.json` 會多一個 `excluded_memory_projects`，下一次同步讀得到，不必靠誰記得。
+- **它只管之後的快照。** 已經 commit 進 git 歷史的舊鏡像不會因此消失，那要另外處理。
+- **理由欄寫類別，不寫內容。** 這份檔案本身會進 git；把要保護的東西寫成排除理由，等於換個地方公開它。
+- `primary_memory_project` 不能同時被排除，同步器會直接拒絕。
+
+origin 的 `exclude` 是同一個想法用在 skill 來源上：活檔目錄裡由平台或別的工具同步進來的子目錄，
+列在這裡就不會被讀進鏡像。
+
 再提醒一次分工（詳見 [walkthrough-first-ingest.md](walkthrough-first-ingest.md) 最後一節）：
 **永久偏好的 canonical 在 `01-profile/`**；平台記憶只放短期 correction 與指回 canonical 的指標。
 不要讓同一條偏好有兩份會分岔的版本。
@@ -139,7 +177,7 @@ python3 bin/skill_sync.py link --apply          # 建立；既有副本先移到
 ./bin/check-routing.sh                          # 來源、入口、hash、連結與路由檢查
 ./08-skill-base/restore-from-vault.sh           # 驗 hash，預覽還原
 ./08-skill-base/restore-from-vault.sh --apply   # 還原列名檔案，再建立共用入口
-python3 bin/test_skill_sync.py                  # 同步引擎自測（全在暫存目錄）
+python3 -B -m unittest discover -s bin -p 'test_*.py'   # bin/ 五組自測（全在暫存目錄）
 ```
 
 幾個重要的行為，知道了才不會嚇到：
@@ -174,4 +212,4 @@ python3 agent-memory-vault/tools/install_skills.py grill-me --apply    # 只裝�
 
 領域型 skill（綁特定客戶、產線或內部系統的那種）刻意沒有收進來：
 那類 skill 的價值幾乎都在它綁住的脈絡裡，抽掉脈絡就只剩空殼。要長出自己的那幾支，
-從上面第二節的抽取門檻開始。
+從上面第二節的兩道門檻開始。

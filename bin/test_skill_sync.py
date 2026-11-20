@@ -152,6 +152,54 @@ class SkillSyncTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'memory_projects'):
             self.with_registry(memory_projects=['../escape'])
 
+    def test_memory_exclusion_skips_a_project_before_reading_it(self):
+        # The excluded project holds something the secret preflight would refuse. A snapshot that still
+        # succeeds proves the project was skipped before its files were opened, not filtered afterwards.
+        self.put(self.user / '.claude/projects/other/memory/note.md',
+                 'ghp_' + 'A' * 36)
+        store = self.with_registry(memory_exclusions={'other': '不收進這個 vault'})
+        store.links(apply=True)
+        store.snapshot(apply=True)
+        base = self.vault / '08-skill-base'
+        self.assertTrue((base / 'claude-memory/MEMORY.md').is_file())
+        self.assertFalse((base / 'claude-memory/by-project/other').exists())
+        metadata = json.loads((base / 'snapshot.json').read_text())
+        self.assertEqual(metadata['memory_projects'], ['main'])
+        self.assertEqual(metadata['excluded_memory_projects'], {'other': '不收進這個 vault'})
+        self.assertGreater(store.check(), 0)
+
+    def test_memory_exclusion_wins_over_the_allowlist(self):
+        store = self.with_registry(memory_projects=['main', 'other'], memory_exclusions={'other': 'reason'})
+        payload, projects = store.snapshot_payload()
+        self.assertEqual(projects, ['main'])
+        self.assertFalse(any('by-project/other' in key for key in payload))
+
+    def test_snapshot_metadata_is_unchanged_when_nothing_is_excluded(self):
+        self.store.links(apply=True)
+        self.store.snapshot(apply=True)
+        metadata = json.loads((self.vault / '08-skill-base/snapshot.json').read_text())
+        self.assertNotIn('excluded_memory_projects', metadata)
+
+    def test_invalid_memory_exclusions_are_rejected(self):
+        for bad in (['other'], {'other': ''}, {'other': '   '}, {'a/b': 'reason'}, {'..': 'reason'}, {'other': 3}):
+            with self.assertRaises(ValueError, msg=repr(bad)):
+                self.with_registry(memory_exclusions=bad)
+        with self.assertRaisesRegex(ValueError, 'primary'):
+            self.with_registry(memory_exclusions={'main': 'reason'})
+
+    def test_origin_exclude_skips_top_level_entries_owned_by_another_tool(self):
+        self.put(self.user / 'extra-a/skills/platform-synced/SKILL.md', 'managed elsewhere')
+        self.put(self.user / 'extra-a/skills/.trash/old/SKILL.md', 'deleted')
+        origins = [dict(item) for item in self.registry['origins']]
+        next(item for item in origins if item['id'] == 'origin-extra-a')['exclude'] = ['platform-synced', '.trash']
+        store = self.with_registry(origins=origins)
+        payload, _ = store.snapshot_payload()
+        self.assertIn('origin-extra-a/method.md', payload)
+        self.assertFalse(any('platform-synced' in key or '.trash' in key for key in payload))
+        origins[2]['exclude'] = 'platform-synced'
+        with self.assertRaisesRegex(ValueError, 'exclude'):
+            self.with_registry(origins=origins)
+
     def test_secret_preflight_leaves_destination_unchanged(self):
         self.put(self.user / '.claude/skills/example/bad.md', 'AIza' + 'Z' * 35)
         before = read_tree(self.vault)

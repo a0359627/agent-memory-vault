@@ -58,7 +58,8 @@ Wiki 式記憶是「理解層」，不是 production control plane。它可以�
 
 不強迫所有頁面使用相同表格，但高影響主張至少要能看出：
 
-- `status`：`current`／`superseded`／`contested`／`watchlist`／`stale`；
+- `status`：`current`／`superseded`／`contested`／`watchlist`／`stale`／`historical`
+  （`historical` 是凍結的時間切片，例如 review 與 worklog：它當時是對的，現在不再更新）；
 - `source`：檔案、commit、事件或人類明確說法；
 - `observed_at`：何時取得；
 - `scope`：個人、角色、團隊、專案或單次 case；
@@ -66,6 +67,14 @@ Wiki 式記憶是「理解層」，不是 production control plane。它可以�
 - `confidence`：`confirmed`／`source-backed`／`watchlist`，不得用假精確百分比；
 - `revisit_when`：什麼條件改變時要重問；
 - `supersedes`／`superseded_by`：若有取代關係，指向前後版本。
+- `subject_status`：只給 project／skill 這類「描述某個東西」的頁，記那個東西自己的狀態
+  （`pilot`／`production`／`frozen`／`draft`…）。`status` 只回答「這一頁的理解還算不算數」。
+  兩件事分開記，所以「專案已凍結、但這張卡對它的描述仍是現行的」寫得出來。
+
+這些欄位不只是寫給人看的。`status` 與 `subject_status` 的詞彙是封閉的（`bin/status-vocab.json`），
+`./bin/check-routing.sh` 會對詞彙外的值、日期已過的 `revisit_when`、缺 `superseded_by` 的 superseded 頁、
+以及沒有任何日期欄位的 `current` 頁發 warning。warning 不擋寫入，但看得見——
+只寫在這一頁的規則會被跳過，會變黃的規則不會。
 
 ## Promotion：什麼可以升成個人記憶
 
@@ -94,6 +103,16 @@ Wiki 式記憶是「理解層」，不是 production control plane。它可以�
 - **遺忘**：使用者要求刪除個人推論或私人記憶時，從 active memory 移除；若稽核需要保留刪除事件，只記
   「何時、誰要求忘記哪個記憶 ID」，不保留被要求刪除的敏感內容。
 
+以上是判準。讓它們真的被執行的節奏是每週一次的 [[vault-consolidation]]：機械整併直接做，
+標 `stale`／`superseded`／`contested` 這類判斷只提案、由人決定。沒有排程的遺忘規則只是一段文字。
+
+## 索引原則
+
+- **index 以目的為導向，不以技術或能力分類。** 分類問「為什麼會有這條記憶、它服務什麼目的」，
+  不問「它屬於哪種工具」。同一個目的底下的兩個做法放同一條，否則一件事會散成幾條互不相連的記憶。
+- **人工抽驗介面是可替換的。** 圖譜檢視器只用來看結構、連結完整性與「今天新開的頁有沒有進 index」；
+  換任何支援雙向連結的工具都可以，記憶本體的結構不依賴它。
+
 ## Open Questions
 
 [[open-questions]] 只追蹤「若不知道會讓未來協助失準」的問題，例如：某項偏好只適用單一客戶還是所有
@@ -109,6 +128,9 @@ Wiki 式記憶是「理解層」，不是 production control plane。它可以�
 - **只讀**：觀察者不回寫來源系統，不改它的規則、狀態或路由。
 - **去識別、分 scope**：個人記憶、角色記憶、團隊記憶與組織政策分開存、分開授權；不以活動量評分人。
 - **候選不是記憶**：抽出來的東西一律先是 candidate，經人類確認、更正或要求忘記之後才進 canonical。
+
+平台自有的專案記憶也適用同一套：它是短期更正與指標，不是第二份 canonical。專案型的記憶檔帶
+`observed_at` 與 `revisit_when`；鏡像進 vault 之前先用 `memory_exclusions` 排除不該收的專案（見 `ROUTING.md`）。
 
 ## 寫入檢查
 
@@ -126,4 +148,4 @@ Wiki 式記憶是「理解層」，不是 production control plane。它可以�
 
 > 證據紀錄保存發生過什麼；記憶代謝保存我們目前怎麼理解；執行系統保存這次核准要做什麼。
 
-回 [[index]] · [[open-questions]]
+回 [[index]] · [[open-questions]] · [[vault-consolidation]]

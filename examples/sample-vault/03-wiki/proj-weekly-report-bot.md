@@ -1,7 +1,8 @@
 ---
 title: 週報產生器
 type: project
-status: production
+status: current
+subject_status: production
 updated: 2026-02-20
 verification: weekly-run-plus-human-approval
 last_execution_evidence: 2026-02-20
@@ -46,7 +47,8 @@ supersedes: 本頁 2026-01-20 版的「自動寄送」設計（見下方 superse
 
 ## 已取代：2026-01-20 – 2026-02-18 的自動寄送設計（`superseded`）
 
-> `status: superseded`，`superseded_by`: 本頁上方的「現行有效」段（2026-02-20）。
+> 段落層級的 `superseded`：由本頁上方的「現行有效」段（2026-02-20）取代。
+> 整頁仍是 `status: current`，所以 frontmatter 不寫 `superseded_by`；整頁被另一頁取代時才寫，並指向那一頁。
 > 保留原文是為了讓人看懂當初為什麼會那樣做，**不是**因為它還有效。
 
 當時的設計是「腳本產草稿之後直接寄出」，理由是：週報內容高度重複、每週手動複製貼上很浪費時間，
@@ -59,7 +61,7 @@ supersedes: 本頁 2026-01-20 版的「自動寄送」設計（見下方 superse
 2. **省下來的時間不值那個風險。** 每週手動寄兩封信大約三分鐘；
    一次誤寄要花掉的道歉與重寄成本遠超過三分鐘 × 一年。
 
-當初 2026-01-20 就把狀態寫成 `production`，也是高估——它日常在用沒錯，
+當初 2026-01-20 就把專案狀態寫成 `production`，也是高估——它日常在用沒錯，
 但「有人類驗收」這一格其實是空的。
 
 ---

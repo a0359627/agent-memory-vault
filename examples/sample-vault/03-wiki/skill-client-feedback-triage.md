@@ -1,7 +1,8 @@
 ---
 title: client-feedback-triage — 客戶回饋分類（草稿）
-type: skill
-status: draft
+type: skill-card
+status: watchlist
+subject_status: draft
 updated: 2026-02-05
 verified_at: 2026-02-05
 verification: one-client-two-runs

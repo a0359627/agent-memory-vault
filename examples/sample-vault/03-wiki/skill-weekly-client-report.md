@@ -1,10 +1,12 @@
 ---
 title: weekly-client-report — 每週客戶進度報告
-type: skill
-status: active
+type: skill-card
+status: current
+subject_status: active
 updated: 2026-02-03
 verified_at: 2026-02-03
 verification: two-clients-three-weeks-plus-second-person-reproduction
+promoted_from: 05-skills-drafts/weekly-client-report
 scope: shared-all-clients
 authority: user-confirmed
 confidence: confirmed

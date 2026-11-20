@@ -23,7 +23,8 @@
 - 單一專案或單次趕工的選擇；
 - 沒有來源、只有模型摘要的主張。
 
-candidate 標 `status: candidate` 與生效日，或先留在 [[open-questions]]；
+candidate 在條目行內標 `candidate` 與生效日，或先留在 [[open-questions]]；
+整頁都還是候選時，frontmatter 用 `status: watchlist`（`candidate` 不是 `status` 的合法值）。
 **頻率不是同意，沉默不是核准**。升格規則見 [[memory-metabolism]]。
 
 單案才成立的偏好要寫明 scope（例如「只適用某一類內容，不外推」），不要讓它變成全域規則。

@@ -8,6 +8,8 @@ type: index
 > 本頁是**目的導覽**，不是安裝清單：告訴你「什麼情境用哪一支」。
 > skill 正文放活檔位置（見 [ROUTING](../ROUTING.md)），機器可讀的來源清單是 `bin/skill-sources.json`。
 > skill 卡只導航，不複製整份 skill。三個區塊分開看，狀態不要混。
+> 卡片的 `status` 記卡片本身：Active 區的是 `current`（並帶 `verified_at`，超過 180 天會被提醒重驗），
+> Draft 區的是 `watchlist`；skill 自己的狀態寫在 `subject_status`。
 
 ## Active（活檔，現在就會被觸發）
 
@@ -18,7 +20,8 @@ type: index
 
 ## Draft（`05-skills-drafts/`，尚未晉升）
 
-> 只有通過實戰、且抽取門檻成立的草稿才晉升；晉升後刪草稿，不留兩份分歧全文。
+> 只有通過實戰、且抽取門檻成立的草稿才晉升：至少跨 2 個 session 真用 3 次、步驟能無歧義寫出、
+> 所需工具在當前環境找得到。晉升後刪草稿，不留兩份分歧全文。
 > 晉升條件與路徑見 [05-skills-drafts/README.md](../05-skills-drafts/README.md)。
 
 - （目前無。）

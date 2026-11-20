@@ -10,9 +10,13 @@
 ---
 title: skill — <name>
 type: skill-card
-status: <active | draft | deprecated>
+status: <current | watchlist | stale | superseded，草稿寫 watchlist>
+subject_status: <active | draft | deprecated>
 scope: <跨專案 | 只對某個 repo 成立>
 updated: <YYYY-MM-DD>
+verified_at: <YYYY-MM-DD，你最後一次確認活檔還在、還適用的日期；草稿可整行刪掉>
+verification: <怎麼確認的：實跑了一次 | 讀過正文 | 只確認檔案存在>
+promoted_from: <05-skills-drafts/<name>，不是從草稿晉升的就整行刪掉>
 ---
 
 # <name>
@@ -66,5 +70,11 @@ updated: <YYYY-MM-DD>
 - **卡片和正文分歧時，正文是真相。** 卡片過期了就更新卡片，不要反過來改正文遷就卡片。
 - 「與相鄰能力的分工」那張表是這張卡最值錢的部分。相似名稱不代表可以刪掉其中一支，
   但也不代表兩支都要跑——寫清楚哪個情境走哪一支。
-- 草稿階段的 skill 也可以有卡片，`status: draft`，本體指向 `05-skills-drafts/<name>/`。
-  晉升之後改 `active`、把本體路徑改掉，並在取代說明區記一行。
+- 草稿階段的 skill 也可以有卡片：`status: watchlist`、`subject_status: draft`，本體指向 `05-skills-drafts/<name>/`。
+  晉升之後改成 `status: current`、`subject_status: active`，填 `promoted_from` 與 `verified_at`、
+  把本體路徑改掉，並在取代說明區記一行。
+- **`verified_at` 是這張卡的保鮮期。** `current` 的 skill 卡沒有它、或它超過 180 天，
+  `./bin/check-routing.sh` 會提醒你回來確認：活檔還在嗎、觸發情境還成立嗎。
+  一支沒人驗過的 skill 比沒有 skill 更糟，因為它會很有把握地做錯。
+  `verification` 老實寫你做到哪一層；「只確認檔案存在」也是有效資訊。
+- 不再使用的 skill：卡片 `status: stale`、`subject_status: deprecated`；被另一支取代就用 `superseded` 並填 `superseded_by`。

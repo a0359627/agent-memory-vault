@@ -20,7 +20,9 @@
 
 預設不同步任何平台記憶目錄：來源清單的 `memory_source` 出廠值是 `null`。
 要打開之前先讀 agent-memory-vault 的 `docs/skills-and-sync.md`——不加限制的記憶來源會把
-這台機器上**每個**專案的記憶都吸進 vault。
+這台機器上**每個**專案的記憶都吸進 vault。打開之後，不該收的專案用 `memory_exclusions`
+（專案 id → 排除原因）列出來：排除發生在讀取記憶內容之前，決策會留在 `snapshot.json`。
+來源目錄裡由別的工具管理的頂層子目錄，用該 origin 的 `exclude` 排除。
 
 ## 操作
 
@@ -53,4 +55,6 @@ python3 bin/test_skill_sync.py
 ```
 
 測試全部在隔離 temporary directory 執行，涵蓋唯讀預覽、備份、連結、各來源還原、
-缺來源與 secret 攔截、hash 異常、冪等與防止寫穿 symlink。機械檢查不等於語意／業務驗收。
+缺來源與 secret 攔截、記憶專案排除、hash 異常、冪等與防止寫穿 symlink。機械檢查不等於語意／業務驗收。
+`bin/` 底下其餘的 `test_*.py` 驗的是代謝 gate、狀態拆軸、活動快照與整併工具，一次全跑：
+`python3 -B -m unittest discover -s bin -p 'test_*.py'`。

@@ -3,6 +3,10 @@
 # 這是 activity/VCS snapshot，不是 production、部署或人類驗收的語意證明。
 # 用法：./bin/scan-state.sh [--fetch]
 #
+# 兩軸（0.2.0 起）：project card 的 `status` 是這一頁的記憶生命週期（current／stale／…），
+# `subject_status` 才是專案自己的狀態（production／pilot／frozen／…）。本檔拿 `subject_status`
+# 決定怎麼標活動量測；卡片還沒拆軸、只有 `status` 時退回讀它，舊卡不必先遷移就能照常掃。
+#
 # 可攜性：`stat` 與 `date` 的旗標在 BSD（macOS）與 GNU（Linux）兩家完全不同，
 # 所以開頭先探測一次再決定用哪一套；兩家都探不到就**直接停，不寫 STATUS.md**。
 # 這是刻意的 fail-closed：前一版寫死 BSD 旗標，在 GNU 上 `stat` 會靜默失敗、
@@ -60,7 +64,7 @@ latest_activity() {
   fi
   line=$(find "$src" \
     \( -name .git -o -name .obsidian -o -name node_modules -o -name .venv -o -name venv -o -name __pycache__ -o -name .cache -o -name .pytest_cache -o -name 99-secrets-local -o -name tokens \) -prune -o \
-    \( -name .DS_Store -o -name 'token*' -o -name '*credential*' -o -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' \) -prune -o \
+    \( -name .DS_Store -o -name '.env' -o -name '.env.*' -o -name 'token*' -o -name '*credential*' -o -name '*.db' -o -name '*.db-*' -o -name '*.sqlite' -o -name '*.sqlite-*' -o -name '*.sqlite3' -o -name '*.sqlite3-*' \) -prune -o \
     -type f -exec stat "$STAT_FLAG" "$STAT_FMT" {} + 2>/dev/null | sort -t'|' -k1,1nr | head -n1)
   [[ -n "$line" ]] && echo "$line" || stat "$STAT_FLAG" "$STAT_FMT" "$src" 2>/dev/null
 }
@@ -68,12 +72,24 @@ latest_activity() {
 # bash 3.2 沒有關聯陣列；用一個以空白分隔的字串當「已 fetch 過的 repo root」集合。
 fetched=""
 rows=(); nobackup=(); branchrisk=(); duesoon=(); dirty=()
+fetch_failures=0
 
 for page in "$VAULT"/03-wiki/proj-*.md; do
   [[ -f "$page" ]] || continue
   name=$(basename "$page" .md); name=${name#proj-}
   src=$(fm "$page" source); src=${src/#\~/$HOME}
-  claimed=$(fm "$page" status)
+  lifecycle=$(fm "$page" status)
+  claimed=$(fm "$page" subject_status)
+  # 欄位值裡的 `|` 會把下面以 `|` 串接的列與 Markdown 表格一起切壞，先換掉。
+  lifecycle=${lifecycle//|/／}; claimed=${claimed//|/／}
+  if [[ -z "$claimed" ]]; then
+    case "$lifecycle" in
+      # 已經是兩軸寫法、只是沒填專案狀態：別把生命週期的字搬去專案欄。
+      current|superseded|contested|watchlist|stale|historical|"") ;;
+      # 0.1.x 的單軸卡片：`status` 裡放的其實是專案狀態，照舊讀它，並標明還沒拆軸。
+      *) claimed="$lifecycle"; lifecycle="未拆軸" ;;
+    esac
+  fi
   management_scope=$(fm "$page" management_scope)
   intent=$(fm "$page" intent)
   due=$(fm "$page" due)
@@ -88,6 +104,7 @@ for page in "$VAULT"/03-wiki/proj-*.md; do
       days=$(( (NOW - mt) / 86400 ))
       disk=$(epoch_to_date "$mt"); [[ -n "$disk" ]] || disk="—"
       [[ "$lastfile" == "$src" ]] && lastrel="$(basename "$lastfile")" || lastrel="${lastfile#$src/}"
+      lastrel=${lastrel//|/／}
     fi
   else
     days=-1; disk="—"; lastrel="—"
@@ -96,17 +113,21 @@ for page in "$VAULT"/03-wiki/proj-*.md; do
   vcs="—"
   if [[ -n "$src" && -e "$src" ]] && git -C "$src" rev-parse --git-dir >/dev/null 2>&1; then
     root=$(git -C "$src" rev-parse --show-toplevel 2>/dev/null)
-    if (( FETCH )); then
+    remote=$(git -C "$root" remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||')
+    # 沒有 origin 的 repo 沒有東西可 fetch：那是「無 remote」，下面會標，不算 fetch 失敗。
+    if (( FETCH )) && [[ -n "$remote" ]]; then
       case " $fetched " in
         *" $root "*) ;;
         *)
-          git -C "$root" fetch --quiet --prune 2>/dev/null || branchrisk+=("$name|$root|fetch 失敗；遠端 drift 未更新")
+          if ! git -C "$root" fetch --quiet --prune origin 2>/dev/null; then
+            branchrisk+=("$name|$root|fetch 失敗；遠端 drift 未更新")
+            fetch_failures=$(( fetch_failures + 1 ))
+          fi
           fetched="$fetched $root"
           ;;
       esac
     fi
 
-    remote=$(git -C "$root" remote get-url origin 2>/dev/null | sed 's|.*github.com[:/]||;s|\.git$||')
     ncommit=$(git -C "$root" rev-list --count HEAD 2>/dev/null || echo 0)
     cur=$(git -C "$root" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
     changes=$(git -C "$root" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
@@ -141,11 +162,14 @@ for page in "$VAULT"/03-wiki/proj-*.md; do
     vcs="🔴 非 git repo"; nobackup+=("$name|$src|不是 git repo")
   fi
 
-  # `intent` 是正式欄位；`status` 的 frozen／archived 是範本也列得出來的詞彙，
+  # `intent` 是正式欄位；`subject_status` 的 frozen／archived 是範本也列得出來的詞彙，
   # 讓它走同一個分支，範本寫得出來的字腳本就認得（見 docs/templates/project-card.md）。
   if [[ "$intent" == "frozen" || "$intent" == "retire" \
         || "$claimed" == "frozen" || "$claimed" == "archived" || "$claimed" == "archive" ]]; then
     measured="${intent:-$claimed}（人工定）"
+  # `source:` 空白或不是絕對路徑（例如一句「尚無 repo」的說明）：沒有東西可量，
+  # 這跟「寫了路徑但找不到」是兩件事，不要都報成路徑不存在。
+  elif [[ -z "$src" || "$src" != /* ]]; then measured="— 未設本機 source"
   elif (( days == -1 )); then measured="❓ 路徑不存在"
   elif (( days < 0 )); then measured="❓ 活動量測失敗"
   elif (( days <= 7 )); then measured="🟢 active"
@@ -167,8 +191,16 @@ for page in "$VAULT"/03-wiki/proj-*.md; do
       duesoon+=("$due|$name|❓ 解析不了（due 要寫成 YYYY-MM-DD）")
     fi
   fi
-  rows+=("$name|$claimed|$measured$flag|$disk|$days|$lastrel|$vcs")
+  rows+=("$name|${lifecycle:-—}|${claimed:-—}|$measured$flag|$disk|$days|$lastrel|$vcs")
 done
+
+refresh_state=false; refresh_label="未 fetch"
+if (( FETCH )); then
+  refresh_state=true; refresh_label="已 fetch（限有 origin 的 repo）"
+  if (( fetch_failures )); then
+    refresh_state=partial; refresh_label="部分 fetch 失敗，見下表"
+  fi
+fi
 
 {
   echo "---"
@@ -176,14 +208,14 @@ done
   echo "type: generated"
   echo "generated_at: $(date '+%Y-%m-%d %H:%M')"
   echo "generator: bin/scan-state.sh"
-  echo "remote_refs_refreshed: $([[ $FETCH == 1 ]] && echo true || echo false)"
+  echo "remote_refs_refreshed: $refresh_state"
   echo "---"
   echo
   echo "# STATUS — 專案活動與 VCS 快照"
   echo
   echo "> **本檔只由 \`bin/scan-state.sh\` 生成。** 它量測遞迴檔案活動、branch drift、dirty entries 與 worktrees；"
   echo "> 不證明 production 正在跑、部署成功、資料完整或人類接受。這些語意真相要回 project card／runtime evidence。"
-  echo "> 生成於 **$(date '+%Y-%m-%d %H:%M')**；remote refs $([[ $FETCH == 1 ]] && echo '已 fetch' || echo '未 fetch')。超過 48 小時先重跑。"
+  echo "> 生成於 **$(date '+%Y-%m-%d %H:%M')**；remote refs ${refresh_label}。超過 48 小時先重跑。"
   echo
 
   if (( ${#nobackup[@]} )); then
@@ -215,14 +247,15 @@ done
 
   echo "## 全表"
   echo
-  echo "⚠️ 只表示頁面標 active／production，但 source 超過 ${DORMANT_DAYS} 天無檔案活動。"
+  echo "記憶狀態讀 \`status\`；專案標籤讀 \`subject_status\`。只有一個 \`status\`、裡面放的是專案狀態的舊卡片，記憶狀態欄標「未拆軸」。專案標籤是卡片上最後記下的值，不是本輪查驗的結果。"
+  echo "⚠️ 只表示專案標 active／production，但 source 超過 ${DORMANT_DAYS} 天無檔案活動。"
   echo
-  echo "| 專案 | 頁面標籤 | 活動量測 | 最近活動 | 天數 | 最近檔案 | VCS |"
-  echo "|---|---|---|---|---|---|---|"
+  echo "| 專案 | 記憶狀態 | 專案標籤 | 活動量測 | 最近活動 | 天數 | 最近檔案 | VCS |"
+  echo "|---|---|---|---|---|---|---|---|"
   if (( ${#rows[@]} )); then
-    printf '%s\n' "${rows[@]}" | sort -t'|' -k5 -n | while IFS='|' read -r a b c d e f g; do
-      [[ "$e" == -* ]] && e="—"
-      echo "| $a | $b | $c | $d | $e | \`$f\` | $g |"
+    printf '%s\n' "${rows[@]}" | sort -t'|' -k6 -n | while IFS='|' read -r a b c d e f g h; do
+      [[ "$f" == -* ]] && f="—"
+      echo "| $a | $b | $c | $d | $e | $f | \`$g\` | $h |"
     done
   fi
   echo

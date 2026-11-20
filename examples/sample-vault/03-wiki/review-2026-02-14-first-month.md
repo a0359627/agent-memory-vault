@@ -1,7 +1,7 @@
 ---
 title: 2026-02-14 第一個月回顧
 type: review
-status: frozen
+status: historical
 updated: 2026-02-14
 scope: all-client-work-2026-01-04-to-2026-02-14
 authority: repo-evidence-plus-user-decision
@@ -37,7 +37,7 @@ confidence: source-backed
 - **deployed**：東西跑在客戶看得到的地方。只證明它在運作，不證明它是對的。
 - **client accepted**：客戶以**文字**說了可以。這一欄整個月都是空的。
 
-以後三者分開寫。任何一張卡的 `status` 是 `production`，都要能指出 client accepted 的那封信。
+以後三者分開寫。任何一張卡的 `subject_status` 是 `production`，都要能指出 client accepted 的那封信。
 
 ## 風險清單（寫完當下）
 

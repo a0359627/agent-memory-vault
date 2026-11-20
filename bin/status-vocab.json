@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "note": "status 只記頁面的記憶生命週期；subject_status 記頁面所描述之專案／skill 的狀態。兩軸分開，所以 status: current 搭配 subject_status: frozen 是合法的：這一頁的理解是現行的，它描述的專案已凍結。要增減詞彙就改這一份，bin/check-routing.sh 與 bin/migrate_status.py 都讀它。",
+  "status": {
+    "lifecycle": [
+      "current",
+      "superseded",
+      "contested",
+      "watchlist",
+      "stale",
+      "historical"
+    ]
+  },
+  "subject_status": {
+    "allowed": [
+      "discovery",
+      "planning",
+      "pilot",
+      "active",
+      "production",
+      "parked",
+      "frozen",
+      "archived",
+      "archive",
+      "observe-only",
+      "draft",
+      "deprecated",
+      "source-only"
+    ]
+  },
+  "derive_lifecycle_from_old_status": {
+    "note": "bin/migrate_status.py 把 0.1.x 的單軸 status 拆成兩軸時用的對照；沒列到的舊值一律得到 default。",
+    "superseded_if_field_present": "superseded_by",
+    "frozen_slice_types": ["review", "worklog"],
+    "frozen_slice_values": ["frozen", "archived", "archive"],
+    "watchlist": ["draft", "candidate"],
+    "stale": ["deprecated"],
+    "default": "current"
+  },
+  "age_limits_days": {
+    "skill_card_verified_at": 180,
+    "memory_project_without_revisit": 90
+  }
+}

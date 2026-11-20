@@ -224,6 +224,53 @@ class BootstrapTest(unittest.TestCase):
                      if path.name == '__pycache__' or path.suffix == '.pyc']
         self.assertEqual(leftovers, [], f'工具留下了 build 產物：{leftovers}')
 
+    def test_vault_tools_run_in_a_fresh_vault_without_leaving_bytecode(self):
+        """讀者照文件在自己的 vault 裡跑日常工具，不能留下 `__pycache__`，也不能得到 error。
+
+        這些工具互相 import（`consolidate.py` → `check_vault.py` → `skill_sync.py`），
+        任何一支忘了在 import 兄弟模組之前關掉 bytecode，讀者的 `bin/` 就會多出一個內嵌
+        絕對路徑的 `.pyc`。同一輪順便守住另一件事：全新的 vault 過得了自己帶的代謝 gate。
+        """
+        target = self.base / 'vault'
+        self.assertEqual(self.run_bootstrap(target).returncode, 0)
+        environment = self.env()
+        environment.pop('PYTHONDONTWRITEBYTECODE', None)
+
+        def run(*argv: str) -> subprocess.CompletedProcess:
+            return subprocess.run([sys.executable, *argv], capture_output=True, text=True,
+                                  cwd=str(target), env=environment)
+
+        check = run('bin/check_vault.py', '--skip-snapshot')
+        self.assertEqual(check.returncode, 0, check.stdout + check.stderr)
+        report = json.loads(check.stdout)
+        self.assertEqual(report['errors'], [])
+        # 全新的 vault 只該有兩條「起始狀態」的 warning；其餘任何一條都代表範本與檢查器對不上。
+        starting_state = ('No shared skills declared', 'STATUS snapshot missing')
+        unexpected = [w for w in report['warnings'] if not w.startswith(starting_state)]
+        self.assertEqual(unexpected, [], '範本自己就違反了它教的寫法')
+
+        consolidate = run('bin/consolidate.py')
+        self.assertEqual(consolidate.returncode, 0, consolidate.stderr)
+        summary = json.loads(consolidate.stdout)
+        self.assertEqual(summary['frontmatter_warnings'], [])
+        self.assertEqual(summary['orphan_wiki_pages'], [])
+        self.assertFalse(summary['injected_layer']['over_budget'],
+                         f"範本的每輪載入層超過預算：{summary['injected_layer']}")
+
+        migrate = run('bin/migrate_status.py')
+        self.assertEqual(migrate.returncode, 0, migrate.stderr)
+        self.assertEqual(json.loads(migrate.stdout)['pages_to_change'], 0)
+
+        for name in ('test_check_vault.py', 'test_consolidate.py', 'test_migrate_status.py'):
+            result = run(f'bin/{name}')
+            self.assertEqual(result.returncode, 0, f'{name}\n{result.stderr}')
+
+        leftovers = [str(path.relative_to(target)) for path in target.rglob('*')
+                     if path.name == '__pycache__' or path.suffix == '.pyc']
+        self.assertEqual(leftovers, [], f'工具留下了 build 產物：{leftovers}')
+        self.assertEqual(self.git(target, 'status', '--porcelain'), '',
+                         '唯讀的工具改動了 vault 的工作樹')
+
 
 if __name__ == '__main__':
     unittest.main()

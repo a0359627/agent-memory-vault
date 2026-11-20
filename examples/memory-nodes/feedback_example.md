@@ -17,6 +17,11 @@ metadata:
 **source：** 小明本人 2026-02-20 的明確指示；已寫成 vault `01-profile/01-preferences.md`
 的 `current` 條目。事故本身記在 `01-profile/03-known-traps.md` 第 3 條。
 
+- **authority：** `user-confirmed`
+- **status：** `current`
+- **observed_at：** 2026-02-20
+- **revisit_when：** 小明明示改變這條規則時。工具多了真正零副作用的乾跑模式，也不會自動放寬它。
+
 **Why:** 2026-02-18 有一個叫 `--preview` 的旗標把未定稿的週報真的寄給了兩個客戶。
 它跳過的只是「寫入寄件紀錄」，不是寄送——名字讓所有人（包括寫它的人）以為它是乾跑。
 這條回饋的真正內容不是「小心一點」，而是：**乾跑必須零副作用，否則不要叫乾跑。**

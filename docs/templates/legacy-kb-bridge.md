@@ -14,7 +14,8 @@
 ---
 title: Legacy — <舊知識庫名稱>
 type: bridge
-status: source-only
+status: current
+subject_status: source-only
 updated: <YYYY-MM-DD>
 retired_at: <YYYY-MM-DD，它停止接收新內容的那天>
 ---

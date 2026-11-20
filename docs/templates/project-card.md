@@ -13,10 +13,23 @@
 | `intent` | `active`（預設） | 活動量測照檔案 mtime 分級 |
 | `intent` | `frozen`／`retire` | 活動量測改成「人工定」，不再因為沒有檔案變動被評成 dormant／stale |
 
-`status:` 是**頁面自稱**，`intent:` 是**你對它的處置**——兩者分開，所以 `status: production` 但 `intent: frozen` 是合法且有意義的組合。
-為了相容，`status` 寫成 `frozen`／`archived`／`archive`（索引頁那一套詞彙的寫法）／`observe-only` 時，腳本也會照同樣的分支處理。
+三個欄位回答三個不同的問題，所以分開寫：
 
-索引頁（`03-wiki/projects.md`）列一句話摘要時用的是同一套詞彙的子集：`discovery`／`planning`／`pilot`／`production`／`observe-only`／`archive`。對照只有兩處要記：索引頁的 `archive` 就是卡片的 `archived`；索引頁的 `observe-only` 來自卡片的 `management_scope:`，不是 `status:`。
+| 欄位 | 回答什麼 | 誰會讀 |
+|---|---|---|
+| `status` | **這張卡的理解還算不算數**（記憶生命週期；新卡一律 `current`） | `bin/check-routing.sh` 的代謝 gate、每週的整併 |
+| `subject_status` | **專案自己做到哪**（卡片上最後記下的值，不是即時狀態） | `bin/scan-state.sh`、索引頁 |
+| `intent` | **你對它的處置** | `bin/scan-state.sh` |
+
+所以 `status: current`、`subject_status: production`、`intent: frozen` 是合法且有意義的組合：
+這張卡的描述是現行的，專案在線上，而你決定先不動它。
+反過來，專案還在跑、但這張卡你已經不敢信了，就是 `status: stale` 配原本的 `subject_status`。
+
+為了相容，`subject_status` 寫成 `frozen`／`archived`／`archive`（索引頁那一套詞彙的寫法）／`observe-only` 時，腳本也會照同樣的分支處理。
+0.1.x 的卡片只有一個 `status:`、裡面放的是專案狀態；`bin/scan-state.sh` 在沒有 `subject_status` 時會退回讀它，
+`bin/migrate_status.py` 可以一次把舊卡拆成兩軸（預設乾跑）。
+
+索引頁（`03-wiki/projects.md`）列一句話摘要時用的是 `subject_status` 那套詞彙的子集：`discovery`／`planning`／`pilot`／`production`／`observe-only`／`archive`。對照只有兩處要記：索引頁的 `archive` 就是卡片的 `archived`；索引頁的 `observe-only` 來自卡片的 `management_scope:`，不是 `subject_status:`。
 
 ---
 
@@ -24,11 +37,13 @@
 ---
 title: <專案名稱>
 type: project
-status: <discovery | planning | pilot | active | production | parked | frozen | archived>
+status: <current | watchlist | contested | stale | superseded | historical，新卡寫 current>
+subject_status: <discovery | planning | pilot | active | production | parked | frozen | archived>
 management_scope: <owner | observe-only，預設 owner，可整行刪掉>
 intent: <active | frozen | retire，預設 active，可整行刪掉>
 source: <指向 active repo 或主要產出的路徑>
 updated: <YYYY-MM-DD>
+revisit_when: <YYYY-MM-DD 或一個條件；日期過了檢查器會提醒你回來重驗，可整行刪掉>
 due: <YYYY-MM-DD，沒有交期就整行刪掉>
 ---
 
@@ -85,8 +100,11 @@ due: <YYYY-MM-DD，沒有交期就整行刪掉>
 
 ## 填寫要點
 
-- **`status` 是頁面撰寫當下的語意標記，不是即時狀態。** 要知道哪些專案真的還活著，
+- **`subject_status` 是頁面撰寫當下的語意標記，不是即時狀態。** 要知道哪些專案真的還活著，
   跑 `./bin/scan-state.sh` 再讀 `STATUS.md`。
+- **`status` 講的是這張卡，不是專案。** 專案結束了，卡片通常還是 `current`（它對那個專案的描述仍然正確），
+  專案狀態改成 `archived`。只有卡片內容本身不可信了才標 `stale`，被另一張卡取代才標 `superseded` 並填 `superseded_by`。
+- **`updated` 不要省。** `current` 的頁面沒有任何日期欄位時，沒有人能判斷它多舊，檢查器會發 warning。
 - **「上線了」永遠要拆開講。** verification 那張表存在的唯一理由，
   就是防止三個月後的你把「測試通過」記成「客戶已經在用」。
 - `last_execution_evidence` 寫「沒有」也是有效資訊，而且比空白誠實。

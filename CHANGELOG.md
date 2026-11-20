@@ -8,6 +8,76 @@
 
 （尚無）
 
+## [0.2.0] — 2026-11-20
+
+把記憶代謝從「寫在政策頁的規範」變成「會響的 gate 加上固定的節奏」。資料夾結構沒有變；
+已經用 0.1.x 建過 vault 的人照 [docs/upgrading.md](docs/upgrading.md) 升級。
+
+### 新增
+
+**兩軸的頁面狀態**
+
+- frontmatter 的 `status` 只記頁面的記憶生命週期（`current`／`superseded`／`contested`／`watchlist`／`stale`／`historical`）；
+  頁面所描述的專案或 skill 自己的狀態改記在新欄位 `subject_status`。`historical` 是新值，給寫完就凍結的 review 與 worklog。
+- `bin/status-vocab.json`：兩套詞彙、舊值對照表與兩個天數門檻的唯一來源。
+- `bin/migrate_status.py`：把 0.1.x 的單軸 `status` 一次拆成兩軸。預設乾跑、只動 frontmatter、重跑是 no-op。
+
+**會響的代謝 gate**（`bin/check_vault.py`，全部只發 warning）
+
+- 詞彙外的 `status`／`subject_status`；`superseded` 缺 `superseded_by` 或目標不存在；日期已過的 `revisit_when`；
+  `current` 的 skill 卡缺 `verified_at` 或超過 180 天；`03-wiki/` 的 `current` 頁沒有任何日期欄位；
+  平台的專案型記憶超過 90 天又沒有 `revisit_when`；`02-raw/`、`04-projects/`、`07-archive/` 的子資料夾沒有被真連結指到。
+- 一個新的 error：`03-wiki/`、`01-profile/` 裡被 `.gitignore` 擋掉的頁面。它在磁碟上一切正常，卻永遠進不了 git。
+
+**每週整併**
+
+- `template/03-wiki/vault-consolidation.md`：機械整併直接做、語意判斷只提案的流程。
+- `bin/consolidate.py`：唯讀報告（待併的 log 碎片、每輪載入層的行數預算、變動最多的頁、過久的 open question、
+  未併回的分支、當下的代謝 warning）；`--apply` 只把 `03-wiki/log-append-*.md` 依日期原文併回 `log.md`。
+- log 碎片慣例：`log.md` 已被別的 session 改動時，改寫 `log-append-YYYY-MM-DD.md`，不在同一個檔尾互撞。
+
+**規則**
+
+- `template/AGENT-RULES.md` 新增「共用工程紀律」八條：原有六條加上錯誤升級階梯、改前估爆炸半徑，
+  以及「高風險才對抗、教訓要核准、回報有形狀」。另新增三條協作規則：不必事事回報、能跑出來的事實不要問人、
+  說「誰做了什麼」之前先看證據。
+- skill 晉升門檻有了數字：跨 2 個 session 真用 3 次、步驟無歧義、工具在當前環境找得到。
+  skill 卡新增 `verified_at`／`verification`／`promoted_from`。
+- `template/01-profile/03-known-traps.md`：條目多一欄「強制層級」；通則從四條增為九條，
+  新的五條談 agent 協作本身（檢查看的是什麼、撤銷授權的範圍、誰做了什麼、交接有沒有送達、掃描擋得住什麼）。
+- 交接完成的定義：對方收到的第一則訊息已包含交接檔路徑與清單本文。
+
+**同步引擎**
+
+- `bin/skill-sources.json` 新增可選的 `memory_exclusions`（專案 id → 排除原因）：排除發生在讀取記憶內容之前，
+  決策記入 `snapshot.json`。origin 新增可選的 `exclude`（頂層名稱），跳過由別的工具管理的子目錄。
+
+**測試與文件**
+
+- `bin/` 新增四組自測（`test_check_vault`、`test_migrate_status`、`test_scan_state`、`test_consolidate`），
+  連同擴充後的 `test_skill_sync` 都會被 `bootstrap.py` 帶進讀者的 vault；`bin/gate.sh` 改為一次全跑。
+- `docs/upgrading.md`：0.1.x → 0.2.0 的逐步升級指南。
+- `docs/concepts.md` 新增「代謝要有引擎」一節與外部記憶分層的對照；`docs/gates.md` 補上每一條新 warning 的意思與處理方式。
+- `docs/REFERENCES.md` 新增三條來源（agent 記憶分層與離線整併、認知架構的記憶分類、一套外部的 agent 工作流方法），
+  各自標明借了什麼與刻意沒收什麼。
+
+### 變更
+
+- `bin/scan-state.sh`：專案標籤改讀 `subject_status`，沒有才退回舊的 `status`；`STATUS.md` 的全表多一欄「記憶狀態」。
+  `--fetch` 有失敗時 `remote_refs_refreshed` 記為 `partial`，沒有 origin 的 repo 不算失敗。
+  `source:` 不是絕對路徑時顯示「未設本機 source」，不再報成路徑不存在。執行中程式持續改寫的檔案
+  （`.env`、資料庫的 `-wal`／`-shm`）不再算作專案活動。
+- 範本：project card 的專案狀態移到 `subject_status`；review 的 `status` 由 `frozen` 改為 `historical`；
+  舊知識庫橋接卡改為 `status: current` 加 `subject_status: source-only`；skill 卡改為兩軸。
+- `examples/sample-vault/` 的頁面改用兩軸寫法。
+- `template/.obsidian/app.json` 預設把 `08-skill-base/` 排除在圖譜之外：鏡像是 skill 正文的副本，會在圖上長出一堆重複節點。
+
+### 相容性
+
+- 0.1.x 的 vault 不升級也能繼續用舊工具；新舊工具不要混搭。
+- 未遷移的單軸卡片仍可被 `bin/scan-state.sh` 掃描；新的 `check_vault.py` 會對它們發 warning，不會擋。
+- `snapshot.json` 格式不變；只有用了 `memory_exclusions` 才會多一個欄位。
+
 ## [0.1.0] — 2026-09-14
 
 第一版。以白名單匯出的方式，把一個私有知識庫裡**可通用的那部分**——骨架、規範、工具與 skill——整理成可被任何人 clone 的起手式。
@@ -51,5 +121,6 @@
 - 支援 macOS 與 Linux。Windows 請在 WSL 底下使用。
 - 本版只收 8 支通用 skill；領域型 skill 刻意不收（理由見 `docs/design-notes.md`）。更多 starter skill、v2 的模式範例與英文版文件，預定在後續版本加入。
 
-[Unreleased]: https://github.com/a0359627/agent-memory-vault/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/a0359627/agent-memory-vault/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/a0359627/agent-memory-vault/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/a0359627/agent-memory-vault/releases/tag/v0.1.0
