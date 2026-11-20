@@ -2,7 +2,9 @@ name: gate
 
 on:
   push:
-    branches: [main]
+    # release/**：維護者發布前先把 commit 推到 release 分支跑同一道 gate，
+    # 綠了再 fast-forward 到 main；必過檢查因此不需要靠 pull request 取得。
+    branches: [main, 'release/**']
   pull_request:
 
 permissions:

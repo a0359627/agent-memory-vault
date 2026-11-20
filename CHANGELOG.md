@@ -63,6 +63,7 @@
 
 ### 變更
 
+- CI：`release/**` 分支的 push 也跑同一道 gate。維護者發布走「推 release 分支 → CI 綠 → fast-forward `main`」，不必為了取得必過檢查開 pull request（[docs/gates.md](docs/gates.md)）。
 - `bin/scan-state.sh`：專案標籤改讀 `subject_status`，沒有才退回舊的 `status`；`STATUS.md` 的全表多一欄「記憶狀態」。
   `--fetch` 有失敗時 `remote_refs_refreshed` 記為 `partial`，沒有 origin 的 repo 不算失敗。
   `source:` 不是絕對路徑時顯示「未設本機 source」，不再報成路徑不存在。執行中程式持續改寫的檔案

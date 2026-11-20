@@ -383,8 +383,12 @@ office kit 結構驗證 → smoke（在暫時 HOME 裡跑 bootstrap → install_
 
 ### CI：`.github/workflows/gate.yml`
 
-push 到 `main` 與所有 pull request 都跑 `bin/gate.sh --public`，Python 3.11，`fetch-depth: 0`。
+push 到 `main`、push 到 `release/**` 分支，與所有 pull request 都跑 `bin/gate.sh --public`，Python 3.11，`fetch-depth: 0`。
 建議在 GitHub 對 `main` 開 branch protection，把這個 job 設成必過。
+
+維護者自己發布時走 release 分支：把要發布的 commit 推到 `release/<版本>`，等這個 job 綠了，
+再 fast-forward 推上 `main`。檢查是掛在 commit 上的，同一個 commit 推上 `main` 時必過檢查已經成立，
+不必為了跑 CI 另外開 pull request，也不需要用管理員權限略過保護。
 
 **fork PR 的 L2 政策**（這是刻意的取捨，不是漏洞）：
 
